@@ -11,4 +11,3 @@ Executar:
 ```
     npm start
 ```
-VPS
