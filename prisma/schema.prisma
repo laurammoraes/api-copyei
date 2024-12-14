@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id         String     @id @default(uuid())
+  name       String     @db.VarChar(255)
+  email      String     @unique
+  password   String
+  role       Roles      @default(USER)
+  updated_at DateTime   @updatedAt
+  created_at DateTime   @default(now())
+  Domains    Domains[]
+  Websites   Websites[]
+}
+
+model Domains {
+  id      Int        @id @default(autoincrement())
+  domain  String     @unique
+  user_id String
+  User    Users      @relation(fields: [user_id], references: [id])
+  Website Websites[]
+}
+
+model Websites {
+  id        Int     @id @default(autoincrement())
+  title     String  @unique @db.VarChar(255)
+  clone_url String  @db.VarChar(255)
+  domain_id Int
+  user_id   String
+  status    Status  @default(ACTIVE)
+  Domain    Domains @relation(fields: [domain_id], references: [id])
+  User      Users   @relation(fields: [user_id], references: [id])
+}
+
+enum Roles {
+  USER
+  ADMIN
+}
+
+enum Status {
+  ACTIVE
+  CLONING
+}

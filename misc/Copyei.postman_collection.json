@@ -1,0 +1,173 @@
+{
+	"info": {
+		"_postman_id": "c03ae0ac-f6a8-4553-ad2f-a6f236cb9f31",
+		"name": "Copyei",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37089183"
+	},
+	"item": [
+		{
+			"name": "aaPanel",
+			"item": [
+				{
+					"name": "Create Website",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"domain\": \"alfanerd.online\",\n\t\"path\": \"/www/wwwroot/alfanerd.online\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/aapanel/websites/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"aapanel",
+								"websites",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Websites",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/aapanel/websites/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"aapanel",
+								"websites",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Teste\",\n\t\"email\": \"teste@gmail.com\",\n\t\"password\": \"Teste123!@#\",\n\t\"repeatPassword\": \"Teste123!@#\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"teste@gmail.com\",\n\t\"password\": \"Teste123!@#\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clone",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJjYTY5ZTAwLTc5MWEtNGFhNS04YWI5LTBmMjJiMTQzMDFjZiIsIm5hbWUiOiJUZXN0ZSIsImVtYWlsIjoidGVzdGVAZ21haWwuY29tIiwiaWF0IjoxNzI2ODQ2MDg0LCJleHAiOjE3Mjc0NTA4ODR9.mc6PuY_ok2VVmhLHv0tLzsvpYfY1K50fpFe1_Lt-fFo",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"url\": \"https://nutricionistacarolfaria.com.br\",\n\t\"domainId\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/clone",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"clone"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
