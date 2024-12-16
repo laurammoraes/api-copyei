@@ -24,9 +24,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            sudo su
-            export NVM_DIR=~/.nvm
-            source ~/.nvm/nvm.sh
             cd /var/www/copyei-backend
             git pull origin main
             npm install --omit=dev
