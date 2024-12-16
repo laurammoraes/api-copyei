@@ -1,4 +1,4 @@
-# - Clonando Sites com Js
+# - Clonando Sites com JS
 
 Baixar dependências
 
