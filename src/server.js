@@ -29,6 +29,8 @@ app.use(
   })
 );
 
+/* Global express rate-limit*/
+app.set("trust proxy", 1); // Accept Nginx proxy
 app.use(
   rateLimit({
     windowMs: 1000 * 30, // 30 segundos
