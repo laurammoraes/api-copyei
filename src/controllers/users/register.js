@@ -28,9 +28,10 @@ export async function registerUser(req, res) {
       return res.status(400).json({ message: "Passwords Do Not Match" });
 
     /* Verificar se o email existe, se existir, retornar mensagem ao usuário */
-    const duplicatedEmail = await prisma.users.findUnique({
+    const duplicatedEmail = await prisma.users.findFirst({
       where: {
         email,
+        deleted_at: null,
       },
       select: {
         id: true,
