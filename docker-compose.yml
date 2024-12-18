@@ -16,7 +16,7 @@ services:
       - POSTGRES_PASSWORD=Teste123!@#
       - POSTGRES_DB=copyei
     ports:
-      - "5440:5432"
+      - "5432:5432"
     volumes:
       - copyei_postgres:/var/lib/postgresql/data
 
