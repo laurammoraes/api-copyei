@@ -15,9 +15,10 @@ export async function loginUser(req, res) {
     const { email, password } = loginBodySchema.parse(req.body);
 
     /* Obter usuário, e se não existir, retornar mensagem ao usuário */
-    const user = await prisma.users.findUnique({
+    const user = await prisma.users.findFirst({
       where: {
         email,
+        deleted_at: null,
       },
       select: {
         id: true,

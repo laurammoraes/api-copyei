@@ -10,13 +10,16 @@ datasource db {
 model Users {
   id         String     @id @default(uuid())
   name       String     @db.VarChar(255)
-  email      String     @unique
+  email      String
   password   String
   role       Roles      @default(USER)
   updated_at DateTime   @updatedAt
+  deleted_at DateTime?
+  paused_at  DateTime?
   created_at DateTime   @default(now())
   Domains    Domains[]
   Websites   Websites[]
+  Logs       Loggers[]
 }
 
 model Domains {
@@ -36,6 +39,16 @@ model Websites {
   status    Status  @default(ACTIVE)
   Domain    Domains @relation(fields: [domain_id], references: [id])
   User      Users   @relation(fields: [user_id], references: [id])
+}
+
+model Loggers {
+  id      Int        @id @default(autoincrement())
+  type  String 
+  function_name String    
+  user_id String
+  created_at DateTime   @default(now())
+
+  User    Users      @relation(fields: [user_id], references: [id])
 }
 
 enum Roles {
