@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import { rateLimit } from "express-rate-limit";
 import cors from "cors";
 
 import { envSchema } from "./config/env.js";
@@ -25,6 +26,15 @@ app.use(
   cors({
     origin: process.env.APP_BASE_URL,
     credentials: true,
+  })
+);
+
+app.use(
+  rateLimit({
+    windowMs: 1000 * 30, // 30 segundos
+    limit: 50, // 50 requisições dentro do intervalo de tempo acima
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
   })
 );
 
