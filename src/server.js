@@ -35,6 +35,7 @@ app.use(
     limit: 50, // 50 requisições dentro do intervalo de tempo acima
     standardHeaders: "draft-8",
     legacyHeaders: false,
+    xForwardedForHeader: false,
   })
 );
 
