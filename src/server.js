@@ -10,6 +10,7 @@ import { usersRouter } from "./routes/usersRouter.js";
 import { domainsRouter } from "./routes/domainsRouter.js";
 import { aaPanelRouter } from "./routes/aapanelRouter.js";
 import { websitesRouter } from "./routes/websitesRouter.js";
+import { isUser } from "./middlewares/isUser.js";
 
 dotenv.config();
 
@@ -37,7 +38,7 @@ app.use("/api", websitesRouter);
 
 /* Static Routes Provider */
 app.use("/api/site/:siteDomain", provideStaticSite);
-app.use("/api/editor/:siteDomain", provideStaticEditor);
+app.use("/api/editor/:siteDomain", isUser, provideStaticEditor);
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 

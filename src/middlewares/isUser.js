@@ -2,8 +2,13 @@ import jwt from "jsonwebtoken";
 
 export async function isUser(req, res, next) {
   try {
+    /*  Simular Header authorization para requisições GET diretas */
+    const directCookie = req.cookies.copyei_user
+      ? `Bearer ${req.cookies.copyei_user}`
+      : null;
+
     /* Obter authorization header */
-    const authorization = req.headers["authorization"];
+    const authorization = req.headers["authorization"] || directCookie;
     if (!authorization)
       return res.status(401).json({ message: "Not Authorized" });
 
