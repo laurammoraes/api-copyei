@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { z, ZodError } from "zod";
 
+import { prisma } from "../lib/prisma.js";
 import { removeEditabilityFromSite } from "../utils/removeEditabilityFromSite.js";
 import { addWatermark } from "../utils/addWatermark.js";
 import { removeWatermark } from "../utils/removeWatermark.js";
@@ -15,6 +16,20 @@ export async function provideStaticSite(req, res, next) {
   try {
     /* Validar o corpo da requisição */
     const { siteDomain } = provideStaticSiteEditorParams.parse(req.params);
+
+    /* Obter usuário */
+    const { user } = req;
+    if (!user) return res.status(401).json({ message: "Não autorizado" });
+
+    /* Obter website no banco de dados, e verificar se o usuário é o dono da página, caso não seja, redirecionar */
+    const website = await prisma.websites.findUnique({
+      where: {
+        title: siteDomain,
+      },
+    });
+    if (!website) return res.status(404).json({ message: "Não encontrado" });
+    if (website.user_id !== user.id)
+      return res.status(403).json({ message: "Não autorizado" });
 
     /* Definir caminho relativo */
     const siteDirectory = path.join(
