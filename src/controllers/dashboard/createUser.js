@@ -1,5 +1,6 @@
 import { z, ZodError } from "zod";
 import bcrypt from "bcrypt";
+import sendEmail from '../../services/sendEmail.js';
 
 import { prisma } from "../../lib/prisma.js";
 
@@ -29,7 +30,7 @@ export async function createUser(req, res) {
 
         const hash = await bcrypt.hash(password, 10);
 
-        await prisma.users.create({
+        const user = await prisma.users.create({
             data: {
                 name,
                 email,
@@ -37,10 +38,22 @@ export async function createUser(req, res) {
             },
         });
 
+        const resetPasswordLink = `https://app.copyei.com/passwordRecovery/${user.id}`;
+
+        const subject = 'Recupere sua senha COPYEI';
+        const text = 'Olá! Recupere sua senha pelo link abaixo';
+        const html = `
+                    <p>Olá,</p>
+                    <p>Sua conta foi criada. Clique no link abaixo para redefinir sua senha:</p>
+                    <a href="${resetPasswordLink}" target="_blank">Clique aqui para redefinir sua senha</a>
+                `;
+
+
+        await sendEmail(email, subject, text, html);
+
         return res.status(201).json({ message: "CREATED" });
     } catch (error) {
 
-        console.log(error)
         if (error instanceof ZodError) {
             return res.status(400).json({
                 message: "Data Parse Error",

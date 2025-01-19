@@ -45,6 +45,7 @@ export async function recoverPassword(req, res) {
             });
         }
 
+        console.log(error)
 
         return res.status(500).json({
             error: "Ocorreu um erro inesperado. Tente novamente mais tarde...",
