@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import sendEmail from '../../services/sendEmail.js';
 import bcrypt from "bcrypt";
 import xlsx from "xlsx";
 import multer from "multer";
@@ -73,6 +74,20 @@ export async function createManyUsers(req, res) {
                     email: user.email,
                     temporaryPassword: password,
                 });
+
+                const resetPasswordLink = `https://app.copyei.com/passwordRecovery/${user.id}`;
+
+                const subject = 'Recupere sua senha COPYEI';
+                const text = 'Olá! Recupere sua senha pelo link abaixo';
+                const html = `
+                    <p>Olá,</p>
+                    <p>Sua conta foi criada. Clique no link abaixo para redefinir sua senha:</p>
+                    <a href="${resetPasswordLink}" target="_blank">Clique aqui para redefinir sua senha</a>
+                   
+                `;
+
+
+                await sendEmail(email, subject, text, html);
             }
 
             return res.status(201).json({
