@@ -13,6 +13,6 @@ export const usersRouter = Router();
 usersRouter.post("/register", registerUser);
 usersRouter.post("/login", loginUser);
 usersRouter.get("/logout", logoutUser);
-usersRouter.post("/request/recover", requestRecoverPassword)
-usersRouter.patch("/recover-password/:id", recoverPassword)
+usersRouter.post("/request/recover", requestRecoverPassword);
+usersRouter.patch("/recover/password/:id", recoverPassword)
 
