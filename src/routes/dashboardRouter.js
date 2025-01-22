@@ -9,6 +9,7 @@ import { activeUser } from "../controllers/dashboard/activeUser.js"
 import { createManyUsers } from "../controllers/dashboard/createManyUsers.js"
 import { downloadSheetWithAllUsers } from "../controllers/dashboard/downloadSheetWithAllUsers.js"
 import { getLogs } from "../controllers/dashboard/getLogs.js"
+import { updateRoleUser } from "../controllers/dashboard/updateRoleUser.js";
 
 export const dashRouter = Router();
 
@@ -21,3 +22,4 @@ dashRouter.patch("/users/user/active/:id", activeUser);
 dashRouter.post("/users/upload-sheet/create-many-users", createManyUsers);
 dashRouter.get("/users/download-sheet/all", downloadSheetWithAllUsers);
 dashRouter.get("/users/logs/:id", getLogs);
+dashRouter.patch("/users/user/update/role", updateRoleUser)
