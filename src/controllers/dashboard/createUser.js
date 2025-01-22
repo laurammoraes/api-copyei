@@ -26,8 +26,17 @@ export async function createUser(req, res) {
             },
 
         });
-        if (duplicatedEmail)
-            return res.status(400).json({ message: "Email Already Exists" });
+        if (duplicatedEmail) {
+            await prisma.users.update({
+                where: { id: duplicatedEmail.id },
+                data: {
+                    role
+                },
+            });
+
+            return res.status(200).json({ message: "Role atualizada com sucesso" })
+        }
+        // return res.status(400).json({ message: "Email Already Exists" });
 
         const hash = await bcrypt.hash(password, 10);
 
