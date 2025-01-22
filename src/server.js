@@ -13,6 +13,7 @@ import { aaPanelRouter } from "./routes/aapanelRouter.js";
 import { websitesRouter } from "./routes/websitesRouter.js";
 import { dashRouter } from "./routes/dashboardRouter.js";
 import { isUser } from "./middlewares/isUser.js";
+import { recoverRouter } from "./routes/recoverRouter.js";
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use("/api", domainsRouter);
 app.use("/api", aaPanelRouter);
 app.use("/api", websitesRouter);
 app.use("/api", dashRouter);
+app.use("/api", recoverRouter);
 
 /* Static Routes Provider */
 app.use("/api/site/:siteDomain", isUser, provideStaticSite);
