@@ -15,8 +15,9 @@ export async function createUser(req, res) {
             req.body
         );
 
-        const password = generatePassword()
+        const role = req.body.role ? req.body.role : 'USER'
 
+        const password = generatePassword()
 
         const duplicatedEmail = await prisma.users.findFirst({
             where: {
@@ -35,6 +36,7 @@ export async function createUser(req, res) {
                 name,
                 email,
                 password: hash,
+                role
             },
         });
 
@@ -53,7 +55,7 @@ export async function createUser(req, res) {
 
         return res.status(201).json({ message: "CREATED" });
     } catch (error) {
-
+        console.log(error)
         if (error instanceof ZodError) {
             return res.status(400).json({
                 message: "Data Parse Error",
