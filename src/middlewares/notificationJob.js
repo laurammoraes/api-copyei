@@ -1,10 +1,9 @@
-const cron = require("node-cron");
-import sendEmail from '../services/sendEmail';
+import cron from "node-cron"
+import sendEmail from  '../services/sendEmail.js'
+import PrismaClient from "@prisma/client"
 
-const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient();
-
+import { prisma } from "../lib/prisma.js";
 
 async function sendReminderEmail(email) {
   try {
@@ -29,17 +28,25 @@ async function sendReminderEmail(email) {
 cron.schedule("0 9 * * *", async () => {
   
 
+  const today = new Date();
   const sevenDaysFromNow = new Date();
-  sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+  sevenDaysFromNow.setDate(today.getDate() + 7);
+
+  
+  const startOfDay = new Date(sevenDaysFromNow.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(sevenDaysFromNow.setHours(23, 59, 59, 999));
 
   try {
     
-    const usersToNotify = await prisma.user.findMany({
+    const usersToNotify = await prisma.users.findMany({
       where: {
-        due_date: sevenDaysFromNow,
+        due_date: {
+          gte: startOfDay, 
+          lt: endOfDay,    
+        },
       },
     });
-    
+
     for (const user of usersToNotify) {
       await sendReminderEmail(user.email, user.due_date);
     }

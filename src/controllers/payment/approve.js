@@ -1,10 +1,12 @@
 import sendEmail from '../../services/sendEmail.js';
 import { prisma } from "../../lib/prisma.js";
 
-export async function approvePurchase(req, res){
+export async function approvePurchase(req, res) {
 
     try {
-        const {email, description_plan, dueDate } = req.body
+        const {email, description_plan, due_date } = req.body
+
+      
         
         const user = await prisma.users.findFirst({
             where: {
@@ -26,7 +28,7 @@ export async function approvePurchase(req, res){
                     deleted_at: null,
                     paused_at: null, 
                     description_plan, 
-                    due_date: new Date(dueDate),
+                    due_date: new Date(due_date),
                     updated_at: new Date(),
                 }
             })
@@ -52,7 +54,7 @@ export async function approvePurchase(req, res){
             data:{
                 email, 
                 description_plan, 
-                due_date: dueDate,
+                due_date: new Date(due_date),
                 updated_at: new Date(),
             }
        })

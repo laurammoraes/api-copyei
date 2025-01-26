@@ -10,6 +10,8 @@ import { createManyUsers } from "../controllers/dashboard/createManyUsers.js"
 import { downloadSheetWithAllUsers } from "../controllers/dashboard/downloadSheetWithAllUsers.js"
 import { getLogs } from "../controllers/dashboard/getLogs.js"
 import { updateRoleUser } from "../controllers/dashboard/updateRoleUser.js";
+import { approvePurchase } from "../controllers/payment/approve.js"
+import { pauseAccount } from "../controllers/payment/pauseAccount.js";
 
 export const dashRouter = Router();
 
@@ -23,3 +25,5 @@ dashRouter.post("/users/upload-sheet/create-many-users", createManyUsers);
 dashRouter.get("/users/download-sheet/all", downloadSheetWithAllUsers);
 dashRouter.get("/users/logs/:id", getLogs);
 dashRouter.patch("/users/user/update/role", updateRoleUser)
+dashRouter.post("/payment/approvedAccount", approvePurchase);
+dashRouter.patch("/payment/pauseAccount", pauseAccount);
