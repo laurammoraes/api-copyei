@@ -13,6 +13,8 @@ model Users {
   email      String
   password   String
   role       Roles      @default(USER)
+  due_date DateTime?
+  description_plan  String? @db.VarChar(255)
   updated_at DateTime   @updatedAt
   deleted_at DateTime?
   paused_at  DateTime?

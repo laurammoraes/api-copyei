@@ -13,7 +13,8 @@ export async function listDetailUser(req, res) {
                 id: true,
                 name: true,
                 email: true,
-                // password: true,
+                description_plan: true,
+                due_date: true,
                 Domains: {
                     select: {
                         id: true,

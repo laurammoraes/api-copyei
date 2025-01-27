@@ -15,6 +15,8 @@ import { dashRouter } from "./routes/dashboardRouter.js";
 import { isUser } from "./middlewares/isUser.js";
 import { recoverRouter } from "./routes/recoverRouter.js";
 
+import "./middlewares/notificationJob.js"; 
+
 dotenv.config();
 
 export const app = express();
@@ -52,6 +54,7 @@ app.use("/api", aaPanelRouter);
 app.use("/api", websitesRouter);
 app.use("/api", dashRouter);
 app.use("/api", recoverRouter);
+
 
 /* Static Routes Provider */
 app.use("/api/site/:siteDomain", isUser, provideStaticSite);
