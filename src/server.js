@@ -13,9 +13,10 @@ import { aaPanelRouter } from "./routes/aapanelRouter.js";
 import { websitesRouter } from "./routes/websitesRouter.js";
 import { dashRouter } from "./routes/dashboardRouter.js";
 import { isUser } from "./middlewares/isUser.js";
+import { domainsHandler } from "./middlewares/domains-handler.js";
 import { recoverRouter } from "./routes/recoverRouter.js";
 
-import "./middlewares/notificationJob.js"; 
+import "./middlewares/notificationJob.js";
 
 dotenv.config();
 
@@ -45,6 +46,8 @@ app.use(
   })
 );
 
+app.use(domainsHandler);
+
 app.get("/", (req, res) => res.status(200).json({ message: "Copyei API" }));
 
 /* Controllers */
@@ -54,7 +57,6 @@ app.use("/api", aaPanelRouter);
 app.use("/api", websitesRouter);
 app.use("/api", dashRouter);
 app.use("/api", recoverRouter);
-
 
 /* Static Routes Provider */
 app.use("/api/site/:siteDomain", isUser, provideStaticSite);
