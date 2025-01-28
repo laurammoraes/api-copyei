@@ -3,33 +3,46 @@ import xlsx from "xlsx";
 
 export async function downloadSheetWithAllUsers(req, res) {
     try {
+        const pageSize = 1000;
+        let page = 0;
+        let users = [];
+        let batch;
 
-        const users = await prisma.users.findMany({
-            where: {
-                deleted_at: null
-            },
-            select: {
-                name: true,
-                email: true,
-                created_at: true,
-                paused_at: true,
-                Websites: {
-                    select: {
-                        clone_url: true,
-                        title: true,
-                        Domain: {
-                            select: {
-                                domain: true
+
+        do {
+            batch = await prisma.users.findMany({
+                where: {
+                    deleted_at: null,
+                    paused_at: null
+                },
+                select: {
+                    name: true,
+                    email: true,
+                    created_at: true,
+                    paused_at: true,
+                    Websites: {
+                        select: {
+                            clone_url: true,
+                            title: true,
+                            Domain: {
+                                select: {
+                                    domain: true
+                                }
                             }
                         }
                     }
-                }
-            }
-        });
+                },
+                take: pageSize,
+                skip: page * pageSize
+            });
+
+            users = [...users, ...batch];
+            page++;
+        } while (batch.length > 0);
 
 
         const planilhaDados = users.map(user => {
-            const websites = user.Websites.map(site => site.siteDomain).join(", ");
+            const websites = user.Websites.map(site => site.clone_url).join(", ");
             const dominios = user.Websites
                 .flatMap(site => site.Domain.map(d => d.domain))
                 .join(", ");
