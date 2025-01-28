@@ -1,4 +1,10 @@
+import { z } from "zod";
+
 import { prisma } from "../../lib/prisma.js";
+
+const findWebSiteQuerySchema = z.object({
+  type: z.enum(["LOCAL", "DRIVE"]).optional(),
+});
 
 export async function findWebSite(req, res) {
   try {
@@ -6,10 +12,13 @@ export async function findWebSite(req, res) {
     const user = req.user;
     if (!user) return res.status(401).json({ message: "Não autorizado" });
 
+    const { type } = findWebSiteQuerySchema.parse(req.query);
+
     /* Busca os sites clonados do usuário autenticado na base de dados */
     const sites = await prisma.websites.findMany({
       where: {
         user_id: user.id,
+        type,
       },
       select: {
         id: true,
@@ -17,6 +26,7 @@ export async function findWebSite(req, res) {
         domain_id: true,
         title: true,
         status: true,
+        type: true,
         Domain: {
           select: {
             id: true,
