@@ -55,6 +55,7 @@ export async function domainsHandler(req, res, next) {
 
     try {
       const websiteTitle = host.split(".")[0];
+      if (!websiteTitle) return next();
 
       const website = await prisma.websites.findUnique({
         where: {
@@ -65,7 +66,8 @@ export async function domainsHandler(req, res, next) {
           driveFolderId: true,
         },
       });
-      if (!website) return next();
+      if (!website || website.type !== "DRIVE" || !website.driveFolderId)
+        return next();
 
       const DRIVE_FOLDER_ID = website.driveFolderId;
 
