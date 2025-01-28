@@ -15,6 +15,7 @@ import { dashRouter } from "./routes/dashboardRouter.js";
 import { isUser } from "./middlewares/isUser.js";
 import { domainsHandler } from "./middlewares/domains-handler.js";
 import { recoverRouter } from "./routes/recoverRouter.js";
+import { googleAuthRouter } from "./routes/googleAuthRoutes.js";
 
 import "./middlewares/notificationJob.js";
 
@@ -57,6 +58,7 @@ app.use("/api", aaPanelRouter);
 app.use("/api", websitesRouter);
 app.use("/api", dashRouter);
 app.use("/api", recoverRouter);
+app.use("/api", googleAuthRouter);
 
 /* Static Routes Provider */
 app.use("/api/site/:siteDomain", isUser, provideStaticSite);

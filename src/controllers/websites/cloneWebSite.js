@@ -60,6 +60,7 @@ export async function cloneWebSite(req, res) {
     const totalWebsites = await prisma.websites.count({
       where: {
         user_id: user.id,
+        type: "LOCAL",
       },
     });
     if (totalWebsites >= 2)

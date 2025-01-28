@@ -9,6 +9,7 @@ import { cloneWebSite } from "../controllers/websites/cloneWebSite.js";
 import { findWebSite } from "../controllers/websites/findWebSite.js";
 import { getWebsiteById } from "../controllers/websites/getWebsite.js";
 import { downloadOnlyHtml } from "../controllers/websites/downloadOnlyHtml.js";
+import { uploadWebsiteToDrive } from "../controllers/websites/uploadWebsiteToDrive.js";
 
 export const websitesRouter = Router();
 
@@ -26,3 +27,8 @@ websitesRouter.post("/clone", isUser, cloneWebSite);
 websitesRouter.get("/download/:siteDomain", isUser, downloadWebSite);
 websitesRouter.get("/searchSites", isUser, findWebSite);
 websitesRouter.get("/websites/:id", isUser, getWebsiteById);
+websitesRouter.post(
+  "/websites/:websiteDomain/upload-to-drive",
+  isUser,
+  uploadWebsiteToDrive
+);
