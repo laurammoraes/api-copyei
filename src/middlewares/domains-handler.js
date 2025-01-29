@@ -88,7 +88,7 @@ export async function domainsHandler(req, res, next) {
       );
 
       res.setHeader("Content-Type", mimeType);
-      fileStream.data.pipe(res);
+      return fileStream.data.pipe(res);
     } catch (error) {
       console.error(error);
       res.status(404).send("Arquivo não encontrado");
