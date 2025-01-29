@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 import { oauth2Client } from "../lib/google-oauth.js";
 import { prisma } from "../lib/prisma.js";
+import { getValidAccessToken } from "../utils/getGoogleAccessToken.js";
 
 /* Obter arquivo do drive pelo path */
 async function getFileIdByPath(drive, folderId, pathSegments) {
@@ -34,21 +35,6 @@ export async function domainsHandler(req, res, next) {
   if (host === "api.copyei.com") return next();
 
   if (host.includes(".zr0.online")) {
-    /* Validar cookie do Google Drive */
-    const { copyei_drive } = req.cookies;
-    if (!copyei_drive)
-      return res
-        .status(400)
-        .json({ message: "O usuário precisa logar com o Google" });
-
-    /* Decodificar token JWT */
-    const decoded = jwt.verify(copyei_drive, process.env.JWT_SECRET);
-    if (!decoded) return res.status(401).json({ message: "Not Authorized" });
-
-    /* Obter instância do Google Drive */
-    oauth2Client.setCredentials(decoded);
-    const drive = google.drive({ version: "v3", auth: oauth2Client });
-
     /* Obter caminho relativo, com o index.html sendo o default */
     const requestPath = req.path === "/" ? "index.html" : req.path.substring(1);
     const pathSegments = requestPath.split("/");
@@ -64,10 +50,20 @@ export async function domainsHandler(req, res, next) {
         select: {
           type: true,
           driveFolderId: true,
+          user_id: true,
         },
       });
       if (!website || website.type !== "DRIVE" || !website.driveFolderId)
         return next();
+
+      const userGoogleCredentials = await getValidAccessToken(website.user_id);
+
+      /* Obter instância do Google Drive */
+      oauth2Client.setCredentials({
+        access_token: userGoogleCredentials.access_token,
+        refresh_token: userGoogleCredentials.refresh_token,
+      });
+      const drive = google.drive({ version: "v3", auth: oauth2Client });
 
       const DRIVE_FOLDER_ID = website.driveFolderId;
 
