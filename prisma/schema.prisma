@@ -8,20 +8,21 @@ datasource db {
 }
 
 model Users {
-  id               String     @id @default(uuid())
-  name             String     @db.VarChar(255)
-  email            String
-  password         String
-  role             Roles      @default(USER)
-  due_date         DateTime?
-  description_plan String?    @db.VarChar(255)
-  updated_at       DateTime   @updatedAt
-  deleted_at       DateTime?
-  paused_at        DateTime?
-  created_at       DateTime   @default(now())
-  Domains          Domains[]
-  Websites         Websites[]
-  Logs             Loggers[]
+  id                String              @id @default(uuid())
+  name              String              @db.VarChar(255)
+  email             String
+  password          String
+  role              Roles               @default(USER)
+  due_date          DateTime?
+  description_plan  String?             @db.VarChar(255)
+  updated_at        DateTime            @updatedAt
+  deleted_at        DateTime?
+  paused_at         DateTime?
+  created_at        DateTime            @default(now())
+  Domains           Domains[]
+  Websites          Websites[]
+  Logs              Loggers[]
+  googleCredentials googleCredentials[]
 }
 
 model Domains {
@@ -70,4 +71,15 @@ enum Roles {
 enum Status {
   ACTIVE
   CLONING
+}
+
+model googleCredentials {
+  id            Int      @id @default(autoincrement())
+  access_token  String
+  refresh_token String
+  expires_at    DateTime
+  created_at    DateTime @default(now())
+
+  user_id String @unique
+  User    Users  @relation(fields: [user_id], references: [id])
 }

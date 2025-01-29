@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import { oauth2Client } from "../../../lib/google-oauth.js";
+import { prisma } from "../../../lib/prisma.js";
 
 export async function googleCallback(req, res) {
   /* Obter código do Google */
@@ -21,6 +22,23 @@ export async function googleCallback(req, res) {
     /* Obter token de autenticação do Google OAuth */
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
+
+    await prisma.googleCredentials.upsert({
+      where: {
+        user_id: decoded.id,
+      },
+      create: {
+        user_id: decoded.id,
+        refresh_token: tokens.refresh_token,
+        access_token: tokens.access_token,
+        expires_at: new Date(tokens.expiry_date),
+      },
+      update: {
+        refresh_token: tokens.refresh_token,
+        access_token: tokens.access_token,
+        expires_at: new Date(tokens.expiry_date),
+      },
+    });
 
     /* Gerar token JWT */
     const jwtToken = jwt.sign(tokens, process.env.JWT_SECRET, {
