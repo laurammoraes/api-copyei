@@ -12,8 +12,11 @@ export async function listUsers(req, res) {
             deleted_at: null,
         };
 
-        if (req.params) {
-            const { name, email, status, role } = req.params;
+
+
+        if (req.query) {
+            const { name, email, status, role } = req.query;
+
 
             if (name) {
                 filters.name = {
