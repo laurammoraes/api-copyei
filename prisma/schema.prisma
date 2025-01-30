@@ -19,6 +19,7 @@ model Users {
   deleted_at        DateTime?
   paused_at         DateTime?
   created_at        DateTime            @default(now())
+  activation_date   DateTime?
   Domains           Domains[]
   Websites          Websites[]
   Logs              Loggers[]
