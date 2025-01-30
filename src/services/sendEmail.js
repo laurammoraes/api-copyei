@@ -7,7 +7,8 @@ const transporter = nodemailer.createTransport({
     secure: true,
     auth: {
         user: 'emailapikey',
-        pass: process.env.PASSEMAIL
+        // pass: process.env.PASSEMAIL
+        pass: 'wSsVR610/ETyB6osyTCkLu85mQxRAFz/FRsojFan43D+H6/A8Mdqk0KfBACgSfUWGDZrEGRDpb99mBhS1WEL3Y8vyllVXCiF9mqRe1U4J3x17qnvhDzMXm9dlxeAKo0IxAVuk2RmFssr+g=='
     },
     authMethod: 'PLAIN',
 
