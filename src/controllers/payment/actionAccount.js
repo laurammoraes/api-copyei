@@ -41,6 +41,15 @@ export async function actionAccount(req, res) {
                 });
             }
 
+            const subject = 'COPYEI - Compra processada!';
+            const text = 'Olá! Sua compra foi processada ';
+            const html = `
+                <p>Olá,</p>
+                <p>Sua compra foi processada! Você receberá seu acesso em ${Number(daysUntilActivation)} dias.</p>
+            `;
+
+            await sendEmail(user.email, subject, text, html);
+
             return res.status(201).json({ message: "ACCOUNT SCHEDULED FOR ACTIVATION" });
         }
 
