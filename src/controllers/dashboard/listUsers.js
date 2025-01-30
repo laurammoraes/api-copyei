@@ -2,37 +2,37 @@ import { prisma } from "../../lib/prisma.js";
 
 export async function listUsers(req, res) {
     try {
-        
+
         const page = 1
         const limit = 10
         const skip = (Number(page) - 1) * Number(limit);
 
-        
+
         const filters = {
             deleted_at: null,
         };
 
-        if(req.body){
-            const { name, email, status, role } = req.body;
+        if (req.params) {
+            const { name, email, status, role } = req.params;
 
             if (name) {
                 filters.name = {
                     contains: name,
-                    mode: "insensitive" 
+                    mode: "insensitive"
                 };
             }
-    
+
             if (email) {
                 filters.email = {
                     contains: email,
                     mode: "insensitive"
                 };
             }
-    
+
             if (status) {
                 filters.status = status;
             }
-    
+
             if (role) {
                 filters.role = role;
             }
