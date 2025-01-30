@@ -41,10 +41,7 @@ export async function listUsers(req, res) {
             }
 
             if (role) {
-                filters.role = {
-                    contains: role,
-                    mode: "insensitive"
-                };
+                filters.role = role
             }
         }
 
