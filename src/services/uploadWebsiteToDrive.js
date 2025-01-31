@@ -75,6 +75,12 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
     throw new Error("Arquivo local não encontrado");
   }
 
+  /* Remover marca da água */
+  await removeWatermark(websiteDirectory);
+
+  /* Remover editor, caso presente */
+  await removeEditabilityFromSite(websiteDirectory);
+
   /* Obter credenciais do Google Drive */
   oauth2Client.setCredentials(decodedJWT);
   const drive = google.drive({ version: "v3", auth: oauth2Client });
