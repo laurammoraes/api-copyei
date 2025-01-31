@@ -6,6 +6,8 @@ import mime from "mime-types";
 
 import { oauth2Client } from "../lib/google-oauth.js";
 import { prisma } from "../lib/prisma.js";
+import { removeWatermark } from "../utils/removeWatermark.js";
+import { removeEditabilityFromSite } from "../utils/removeEditabilityFromSite.js";
 
 async function uploadFolderToDrive(drive, localPath, driveParentId) {
   /* Ler conteúdo do diretório */
