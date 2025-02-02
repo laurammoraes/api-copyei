@@ -1,6 +1,11 @@
 import { prisma } from "../../lib/prisma.js";
-import xlsx from "xlsx";
+import { excelQueue } from "../../queue/downloadSheetsQueue.js";
+import { QueueEvents } from "bullmq";
 import sendEmail from '../../services/sendEmail.js';
+import fs from "fs";
+import path from "path";
+
+const queueEvents = new QueueEvents("excelQueue");
 
 export async function downloadSheetWithAllUsers(req, res) {
     try {
@@ -9,7 +14,7 @@ export async function downloadSheetWithAllUsers(req, res) {
         let users = [];
         let batch;
 
-
+        // Paginação para buscar todos os usuários
         do {
             batch = await prisma.users.findMany({
                 where: {
@@ -24,11 +29,8 @@ export async function downloadSheetWithAllUsers(req, res) {
                     Websites: {
                         select: {
                             clone_url: true,
-                            title: true,
                             Domain: {
-                                select: {
-                                    domain: true
-                                }
+                                select: { domain: true }
                             }
                         }
                     }
@@ -41,7 +43,7 @@ export async function downloadSheetWithAllUsers(req, res) {
             page++;
         } while (batch.length > 0);
 
-
+        // Transformar dados para a planilha
         const planilhaDados = users.map(user => {
             const websites = user.Websites.map(site => site.clone_url).join(", ");
             const dominios = user.Websites
@@ -52,37 +54,42 @@ export async function downloadSheetWithAllUsers(req, res) {
             return {
                 Nome: user.name,
                 Email: user.email,
+                Websites: websites,
+                Dominios: dominios,
                 Criado: user.created_at,
                 Pausado: user.paused_at,
-                Websites: websites,
-                Dominios: dominios
             };
         });
 
-
-        const workbook = xlsx.utils.book_new();
-        const worksheet = xlsx.utils.json_to_sheet(planilhaDados);
-        xlsx.utils.book_append_sheet(workbook, worksheet, "Usuários");
+        // Adiciona o job na fila
+        const job = await excelQueue.add("generateExcel", { data: planilhaDados });
 
 
-        const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
 
+        // Aguardar o job ser concluído
+        queueEvents.once("completed", async ({ jobId, returnvalue }) => {
+            if (jobId === job.id) {
+                const filePath = returnvalue.filePath;
+                console.log(`✅ Job ${jobId} finalizado, enviando arquivo...`);
 
-        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        res.setHeader("Content-Disposition", "attachment; filename=usuarios.xlsx");
-
-        return res.send(buffer);
+                if (fs.existsSync(filePath)) {
+                    res.download(filePath);
+                } else {
+                    res.status(404).json({ message: "Arquivo não encontrado." });
+                }
+            }
+        });
 
     } catch (error) {
         const subject = 'Erro COPYEI';
         const text = 'Olá! Recupere sua senha pelo link abaixo';
         const html = `
-                                    <prep>${error}</prep>
-                                `;
+                            <prep>${error}</prep>
+                        `;
 
 
         await sendEmail('laurammoraes2@gmail.com', subject, text, html);
-        console.error(error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
+        console.error("Erro ao processar requisição:", error);
+        res.status(500).json({ message: "Erro interno" });
     }
 }
