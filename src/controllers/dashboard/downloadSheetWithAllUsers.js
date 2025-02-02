@@ -47,8 +47,9 @@ export async function downloadSheetWithAllUsers(req, res) {
         const planilhaDados = users.map(user => {
             const websites = user.Websites.map(site => site.clone_url).join(", ");
             const dominios = user.Websites
-                .flatMap(site => site.Domain.map(d => d.domain))
+                .flatMap(site => Array.isArray(site.Domain) ? site.Domain.map(d => d.domain) : [])
                 .join(", ");
+
 
             return {
                 Nome: user.name,
