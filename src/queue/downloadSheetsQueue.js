@@ -1,15 +1,14 @@
-const { Queue } = require("bullmq");
+import { Queue } from "bullmq";
 
 
-const excelQueue = new Queue("excelQueue", {
-    redis: {
+
+export const excelQueue = new Queue("excelQueue", {
+    connection: {
         host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
+        port: Number(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
     },
     defaultJobOptions: {
         removeOnComplete: true,
     },
 });
-
-module.exports = { excelQueue };
