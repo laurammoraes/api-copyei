@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import excelQueue from "../../queue/downloadSheetsQueue.js"
 
 
 export async function downloadSheetWithAllUsers(req, res) {
@@ -46,9 +47,6 @@ export async function downloadSheetWithAllUsers(req, res) {
         });
 
         const job = await excelQueue.add("generateExcel", { data: planilhaDados });
-
-
-
 
         queueEvents.on("completed", async ({ jobId, returnvalue }) => {
             if (jobId === job.id) {
