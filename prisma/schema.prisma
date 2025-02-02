@@ -9,9 +9,9 @@ datasource db {
 
 model Users {
   id                String              @id @default(uuid())
-  name              String              @db.VarChar(255)
+  name              String?              @db.VarChar(255)
   email             String
-  password          String
+  password          String?
   role              Roles               @default(USER)
   due_date          DateTime?
   description_plan  String?             @db.VarChar(255)
