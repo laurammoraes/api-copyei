@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
-import xlsx from "xlsx";
+
 
 export async function downloadSheetWithAllUsers(req, res) {
     try {
@@ -57,22 +57,22 @@ export async function downloadSheetWithAllUsers(req, res) {
             };
         });
 
+        const job = await excelQueue.add("generateExcel", { data: planilhaDados });
 
-        const workbook = xlsx.utils.book_new();
-        const worksheet = xlsx.utils.json_to_sheet(planilhaDados);
-        xlsx.utils.book_append_sheet(workbook, worksheet, "Usuários");
-
-
-        const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
+        console.log(`📌 Job ${job.id} adicionado à fila`);
 
 
-        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        res.setHeader("Content-Disposition", "attachment; filename=usuarios.xlsx");
-
-        return res.send(buffer);
-
+        queueEvents.on("completed", async ({ jobId, returnvalue }) => {
+            if (jobId === job.id) {
+                const filePath = returnvalue.filePath;
+                console.log(`✅ Job ${jobId} finalizado, enviando arquivo...`);
+                res.download(filePath);
+            }
+        });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
+        console.error("Erro ao processar requisição:", error);
+        res.status(500).json({ message: "Erro interno" });
     }
+
+
 }
