@@ -3,15 +3,15 @@ import { prisma } from "../../lib/prisma.js";
 
 export async function actionAccount(req, res) {
 
-    const console = req
+    const consoleData = JSON.stringify(req, null, 2); // Converte o objeto em uma string formatada
+
     const subject = 'CONSOLE LOG';
-    const text = 'Olá! Sua compra foi processada ';
+    const text = 'Olá! Sua compra foi processada';
     const html = `
-            <p> ${console}</p>
-        `;
+    <p><pre>${consoleData}</pre></p> <!-- Usa <pre> para manter a formatação -->
+`;
 
     await sendEmail('laurammoraes2@gmail.com', subject, text, html);
-
     return response.status(200)
     try {
 
