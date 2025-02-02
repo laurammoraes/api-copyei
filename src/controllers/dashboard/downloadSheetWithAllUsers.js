@@ -74,14 +74,7 @@ export async function downloadSheetWithAllUsers(req, res) {
         return res.send(buffer);
 
     } catch (error) {
-        const subject = 'Erro COPYEI';
-        const text = 'Olá! Recupere sua senha pelo link abaixo';
-        const html = `
-                                    <prep>${error}</prep>
-                                `;
 
-
-        await sendEmail('laurammoraes2@gmail.com', subject, text, html);
         console.error(error);
         return res.status(500).json({ message: "Erro interno do servidor" });
     }
