@@ -20,17 +20,6 @@ export async function downloadSheetWithAllUsers(req, res) {
                     email: true,
                     created_at: true,
                     paused_at: true,
-                    Websites: {
-                        select: {
-                            clone_url: true,
-                            title: true,
-                            Domain: {
-                                select: {
-                                    domain: true
-                                }
-                            }
-                        }
-                    }
                 },
                 take: pageSize,
                 skip: page * pageSize
@@ -52,14 +41,13 @@ export async function downloadSheetWithAllUsers(req, res) {
                 Email: user.email,
                 Criado: user.created_at,
                 Pausado: user.paused_at,
-                Websites: websites,
-                Dominios: dominios
+
             };
         });
 
         const job = await excelQueue.add("generateExcel", { data: planilhaDados });
 
-        console.log(`📌 Job ${job.id} adicionado à fila`);
+
 
 
         queueEvents.on("completed", async ({ jobId, returnvalue }) => {
