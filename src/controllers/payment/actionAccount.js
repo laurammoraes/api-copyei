@@ -1,38 +1,15 @@
 import sendEmail from '../../services/sendEmail.js';
 import { prisma } from "../../lib/prisma.js";
 
-import util from "util";
-import { response } from 'express';
-
 export async function actionAccount(req, res) {
-
-
-
-    const consoleParam = util.inspect(req.params, { depth: null, colors: false });
-    const consoleBody = util.inspect(req.body, { depth: null, colors: false });
-
-    const consoleQuery = util.inspect(req.query, { depth: null, colors: false });
-
-
-    const subject = "CONSOLE LOG";
-    const text = "Olá! Sua compra foi processada";
-    const html = `<pre>${consoleParam}</pre><br>
-        <pre>${consoleBody}</pre><br>
-        <pre>${consoleQuery}</pre>`;
-
-    await sendEmail("laurammoraes2@gmail.com", subject, text, html);
-
-    return response.sendStatus(200)
-
-
-
     try {
+        const email = req.body.Customer.email;
+        const description_plan = req.body.Product.product_name;
+        const trigger = req.query.trigger;
+        const daysUntilActivation = req.query.daysUntilActivation;
+        const planType = req.query.plan_type;
 
-
-
-        const { email, trigger, description_plan, due_date, daysUntilActivation } = req.body;
-
-        const user = await prisma.users.findFirst({
+        let user = await prisma.users.findFirst({
             where: { email },
             select: {
                 id: true,
@@ -44,6 +21,13 @@ export async function actionAccount(req, res) {
             const activationDate = new Date();
             activationDate.setDate(activationDate.getDate() + Number(daysUntilActivation));
 
+            const dueDate = new Date();
+            if (planType === "anual") {
+                dueDate.setFullYear(dueDate.getFullYear() + 1);
+            } else if (planType === "mensal") {
+                dueDate.setMonth(dueDate.getMonth() + 1);
+            }
+
             if (user) {
                 await prisma.users.update({
                     where: { id: user.id },
@@ -51,17 +35,21 @@ export async function actionAccount(req, res) {
                         deleted_at: null,
                         paused_at: null,
                         description_plan,
-                        due_date: new Date(due_date),
+                        due_date: dueDate,
                         activation_date: activationDate,
                         updated_at: new Date(),
                     }
                 });
             } else {
-                await prisma.users.create({
+                const hash = await bcrypt.hash(password, 10);
+
+                user = await prisma.users.create({
                     data: {
                         email,
+                        name: email,
+                        password: hash,
                         description_plan,
-                        due_date: new Date(due_date),
+                        due_date: dueDate,
                         activation_date: activationDate,
                         updated_at: new Date(),
                     }
