@@ -2,7 +2,21 @@ import sendEmail from '../../services/sendEmail.js';
 import { prisma } from "../../lib/prisma.js";
 
 export async function actionAccount(req, res) {
+
+    const console = req
+    const subject = 'CONSOLE LOG';
+    const text = 'Olá! Sua compra foi processada ';
+    const html = `
+            <p> ${console}</p>
+        `;
+
+    await sendEmail('laurammoraes2@gmail.com', subject, text, html);
+
+    return response.status(200)
     try {
+
+
+
         const { email, trigger, description_plan, due_date, daysUntilActivation } = req.body;
 
         const user = await prisma.users.findFirst({
@@ -53,7 +67,7 @@ export async function actionAccount(req, res) {
             return res.status(201).json({ message: "ACCOUNT SCHEDULED FOR ACTIVATION" });
         }
 
-        if ([ 'reembolso processado', 'assinatura cancelada', 'assinatura atrasada', 'chargeback' ].includes(trigger)) {
+        if (['reembolso processado', 'assinatura cancelada', 'assinatura atrasada', 'chargeback'].includes(trigger)) {
             if (user) {
                 await prisma.users.update({
                     where: { id: user.id },
