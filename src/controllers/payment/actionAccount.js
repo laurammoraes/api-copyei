@@ -1,23 +1,30 @@
 import sendEmail from '../../services/sendEmail.js';
 import { prisma } from "../../lib/prisma.js";
 
+import util from "util";
+import { response } from 'express';
+
 export async function actionAccount(req, res) {
 
-    try {
-        const consoleData = JSON.stringify(req, null, 2); // Converte o objeto em uma string formatada
 
-        const subject = 'CONSOLE LOG';
-        const text = 'Olá! Sua compra foi processada';
-        const html = `
-        <p><pre>${consoleData}</pre></p> <!-- Usa <pre> para manter a formatação -->
-    `;
 
-        await sendEmail('laurammoraes2@gmail.com', subject, text, html);
-        return response.status(200)
+    const consoleParam = util.inspect(req.params, { depth: null, colors: false });
+    const consoleBody = util.inspect(req.body, { depth: null, colors: false });
 
-    } catch (error) {
-        return response.status(500)
-    }
+    const consoleQuery = util.inspect(req.query, { depth: null, colors: false });
+
+
+    const subject = "CONSOLE LOG";
+    const text = "Olá! Sua compra foi processada";
+    const html = `<pre>${consoleParam}</pre><br>
+        <pre>${consoleBody}</pre><br>
+        <pre>${consoleQuery}</pre>`;
+
+    await sendEmail("laurammoraes2@gmail.com", subject, text, html);
+
+    return response.sendStatus(200)
+
+
 
     try {
 
