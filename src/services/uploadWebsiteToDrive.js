@@ -8,6 +8,7 @@ import { oauth2Client } from "../lib/google-oauth.js";
 import { prisma } from "../lib/prisma.js";
 import { removeWatermark } from "../utils/removeWatermark.js";
 import { removeEditabilityFromSite } from "../utils/removeEditabilityFromSite.js";
+import { updateLoadingState } from "./websocket.js";
 
 async function uploadFolderToDrive(drive, localPath, driveParentId) {
   /* Ler conteúdo do diretório */
@@ -125,6 +126,9 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
 
     /* Delete pasta local */
     await fs.rm(websiteDirectory, { recursive: true });
+
+    /* Atualizar estado do websocket */
+    updateLoadingState(websiteDomain);
   } catch (error) {
     console.error(
       `Erro ao fazer upload do site no Google Drive: ${error.message}`
