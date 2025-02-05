@@ -41,7 +41,7 @@ export async function domainsHandler(req, res, next) {
 
     try {
       const websiteTitle = host.split(".")[0];
-      if (!websiteTitle) return next();
+      if (!websiteTitle) return res.redirect(process.env.APP_BASE_URL);
 
       const website = await prisma.websites.findUnique({
         where: {
@@ -54,7 +54,7 @@ export async function domainsHandler(req, res, next) {
         },
       });
       if (!website || website.type !== "DRIVE" || !website.driveFolderId)
-        return next();
+        return res.redirect(process.env.APP_BASE_URL);
 
       const userGoogleCredentials = await getValidAccessToken(website.user_id);
 
@@ -91,7 +91,7 @@ export async function domainsHandler(req, res, next) {
       return fileStream.data.pipe(res);
     } catch (error) {
       console.error(error);
-      res.status(404).send("Arquivo não encontrado");
+      return res.redirect(process.env.APP_BASE_URL);
     }
   }
 
