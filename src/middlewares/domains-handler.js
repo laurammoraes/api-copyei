@@ -17,9 +17,8 @@ async function getFileIdByPath(drive, folderId, pathSegments) {
 
     const files = response.data.files;
 
-    if (files.length === 0) {
-      throw new Error(`Arquivo não encontrado: ${segment}`);
-    }
+    /* Retornar nulo em caso de não encontrar nenhum arquivo no segmento fornecido */
+    if (files.length === 0) return null;
 
     currentFolderId = files[0].id;
   }
@@ -73,6 +72,12 @@ export async function domainsHandler(req, res, next) {
         DRIVE_FOLDER_ID,
         pathSegments
       );
+      /* O Google Drive não conseguiu buscar a página inicial (mais importante) */
+      if (!fileId && req.path === "/")
+        return res.redirect(process.env.APP_BASE_URL);
+
+      /* Retornar mensagem do servidor para arquivos secundários (que não seja index.html) */
+      if (!fileId) return res.status(400).json({ message: "File not found" });
 
       /* Obter tipo do arquivo */
       const metadata = await drive.files.get({
