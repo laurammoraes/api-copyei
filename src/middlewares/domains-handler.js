@@ -83,12 +83,17 @@ export async function domainsHandler(req, res, next) {
       const metadata = await drive.files.get({
         fileId,
         fields: "name, mimeType",
+        supportsAllDrives: true, // Garantir que o google drive consiga acessar arquivos compartilhados
       });
       const mimeType = metadata.data.mimeType || "application/octet-stream";
 
       /* Retornar conteúdo do arquivo para o cliente */
       const fileStream = await drive.files.get(
-        { fileId, alt: "media" },
+        {
+          fileId,
+          alt: "media",
+          supportsAllDrives: true, // Garantir que o google drive consiga acessar arquivos compartilhados
+        },
         { responseType: "stream" }
       );
 
