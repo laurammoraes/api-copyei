@@ -10,6 +10,38 @@ import { removeWatermark } from "../utils/removeWatermark.js";
 import { removeEditabilityFromSite } from "../utils/removeEditabilityFromSite.js";
 import { updateLoadingState } from "./websocket.js";
 
+/* Função para aguardar um intervalo de tempo */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/* Função para criar arquivo no Drive e torná-lo público */
+async function createPublicFile(drive, fileMetadata, media) {
+  try {
+    const fileResponse = await drive.files.create({
+      requestBody: fileMetadata,
+      media: media,
+      fields: "id, webViewLink, webContentLink",
+    });
+
+    /* Aguarda 1 segundo antes de aplicar permissões para evitar erros */
+    await sleep(1000);
+
+    /* Tornar o arquivo público */
+    await drive.permissions.create({
+      fileId: fileResponse.data.id,
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
+    });
+
+    console.log(`Arquivo ${fileMetadata.name} enviado e tornado público.`);
+  } catch (error) {
+    console.error(`Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
+  }
+}
+
 async function uploadFolderToDrive(drive, localPath, driveParentId) {
   /* Ler conteúdo do diretório */
   const entries = await fs.readdir(localPath, { withFileTypes: true });
@@ -47,21 +79,22 @@ async function uploadFolderToDrive(drive, localPath, driveParentId) {
         body: createReadStream(entryPath),
       };
 
-      /* Criar arquivo no Google Drive */
-      const fileResponse = await drive.files.create({
-        requestBody: fileMetadata,
-        media: media,
-        fields: "id, webViewLink, webContentLink",
-      });
+      await createPublicFile(drive, fileMetadata, media);
+      // /* Criar arquivo no Google Drive */
+      // const fileResponse = await drive.files.create({
+      //   requestBody: fileMetadata,
+      //   media: media,
+      //   fields: "id, webViewLink, webContentLink",
+      // });
 
-      /* Tornar o arquivo público */
-      await drive.permissions.create({
-        fileId: fileResponse.data.id,
-        requestBody: {
-          role: "reader",
-          type: "anyone",
-        },
-      });
+      // /* Tornar o arquivo público */
+      // await drive.permissions.create({
+      //   fileId: fileResponse.data.id,
+      //   requestBody: {
+      //     role: "reader",
+      //     type: "anyone",
+      //   },
+      // });
     }
   }
 }
@@ -129,6 +162,8 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
 
     /* Atualizar estado do websocket */
     updateLoadingState(websiteDomain);
+
+    console.log(`Upload de ${websiteDomain} concluído com sucesso.`);
   } catch (error) {
     console.error(
       `Erro ao fazer upload do site no Google Drive: ${error.message}`
