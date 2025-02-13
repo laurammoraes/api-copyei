@@ -39,8 +39,8 @@ app.use(
 app.set("trust proxy", 1); // Accept Nginx proxy
 app.use(
   rateLimit({
-    windowMs: 1000 * 30, // 30 segundos
-    limit: 50, // 50 requisições dentro do intervalo de tempo acima
+    windowMs: 1000 * 60, // 60 segundos
+    limit: 200, // 200 requisições dentro do intervalo de tempo acima
     standardHeaders: "draft-8",
     legacyHeaders: false,
     xForwardedForHeader: false,
