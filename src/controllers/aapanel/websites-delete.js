@@ -95,6 +95,17 @@ export async function aaPanelWebsitesDelete(req, res) {
       });
     }
 
+    //Para ver logs
+    const subject = 'Erro';
+    const text = 'Erro';
+    const html = `
+        <p>Olá ${JSON.stringify(error)},</p>
+       
+    `;
+
+
+    await sendEmail('laurammoraes2@gmail.com', subject, text, html);
+    
     console.error(error);
     return res
       .status(500)
