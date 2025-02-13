@@ -53,10 +53,14 @@ export async function domainsHandler(req, res, next) {
           user_id: true,
         },
       });
+
+      console.log('websites',website)
       if (!website || website.type !== "DRIVE" || !website.driveFolderId)
         return res.redirect(process.env.APP_BASE_URL);
 
       const userGoogleCredentials = await getValidAccessToken(website.user_id);
+
+      console.log('user google',userGoogleCredentials)
 
       /* Obter instância do Google Drive */
       oauth2Client.setCredentials({
