@@ -9,7 +9,7 @@ export async function getValidAccessToken(userId) {
   if (!userToken) throw new Error("Usuário não encontrado");
 
   /* Comparar data de hoje */
-  // const today = new Date();
+  const today = new Date();
   // if (new Date(userToken.expires_at) > today) {
   //   return {
   //     access_token: userToken.access_token,
