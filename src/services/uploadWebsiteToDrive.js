@@ -26,7 +26,7 @@ async function createPublicFile(drive, fileMetadata, media) {
     
     await sleep(1000);
 
-
+   
     await drive.permissions.create({
       fileId: fileResponse.data.id,
       requestBody: {
@@ -43,14 +43,18 @@ async function createPublicFile(drive, fileMetadata, media) {
 
 async function uploadFolderToDrive(drive, localPath, driveParentId) {
 
+  
   const entries = await fs.readdir(localPath, { withFileTypes: true });
 
   for (const entry of entries) {
     const entryPath = path.join(localPath, entry.name);
 
 
-    if (entry.isDirectory()) {
 
+
+    
+    if (entry.isDirectory()) {
+      
       const folderMetadata = {
         name: entry.name,
         mimeType: "application/vnd.google-apps.folder",
@@ -58,6 +62,7 @@ async function uploadFolderToDrive(drive, localPath, driveParentId) {
       };
 
 
+      
       const folderResponse = await drive.files.create({
         requestBody: folderMetadata,
         fields: "id",
@@ -65,10 +70,10 @@ async function uploadFolderToDrive(drive, localPath, driveParentId) {
 
       const folderId = folderResponse.data.id;
 
-      
+     
       await uploadFolderToDrive(drive, entryPath, folderId);
     } else if (entry.isFile()) {
-    
+      
       const fileMetadata = {
         name: entry.name,
         parents: [driveParentId],
@@ -91,12 +96,12 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
     websiteDomain
   );
 
-  
+ 
   if (!existsSync(websiteDirectory)) {
     throw new Error("Arquivo local não encontrado");
   }
 
-  
+ 
   await removeWatermark(websiteDirectory);
 
   
@@ -112,7 +117,7 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
       mimeType: "application/vnd.google-apps.folder",
     };
 
-
+    
     const folderResponse = await drive.files.create({
       requestBody: folderMetadata,
       fields: "id",
@@ -120,7 +125,7 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
 
     const rootFolderId = folderResponse.data.id;
 
-
+    
     await drive.permissions.create({
       fileId: rootFolderId,
       requestBody: {
