@@ -10,13 +10,6 @@ export async function getValidAccessToken(userId) {
 
   /* Comparar data de hoje */
   const today = new Date();
-  // if (new Date(userToken.expires_at) > today) {
-  //   return {
-  //     access_token: userToken.access_token,
-  //     refresh_token: userToken.refresh_token,
-  //   };
-  // }
-
   const bufferTime = 5 * 60 * 1000; // 5 minutos de margem
   if (new Date(userToken.expires_at).getTime() - bufferTime > today.getTime()) {
     return {
@@ -30,7 +23,7 @@ export async function getValidAccessToken(userId) {
   oauth2Client.setCredentials({ refresh_token: userToken.refresh_token });
   const { credentials } = await oauth2Client.refreshAccessToken();
 
-  console.log('credentials', credentials)
+  
 
   await prisma.googleCredentials.update({
     where: {
