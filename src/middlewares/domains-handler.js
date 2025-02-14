@@ -121,9 +121,8 @@ async function getFileIdByPath(drive, folderId, pathSegments) {
 
     const files = response.data.files;
 
-    if (files.length === 0) {
-      throw new Error(`Arquivo não encontrado: ${segment}`);
-    }
+    /* Retornar nulo em caso de não encontrar nenhum arquivo no segmento fornecido */
+    if (files.length === 0) return null;
 
     currentFolderId = files[0].id;
   }
@@ -183,6 +182,7 @@ export async function domainsHandler(req, res, next) {
       const DRIVE_FOLDER_ID = website.driveFolderId;
 
       /* Obter id do arquivo no Google Drive */
+
       const fileId = await getFileIdByPath(drive, DRIVE_FOLDER_ID, pathSegments);
 
       /* Obter tipo do arquivo */
@@ -213,6 +213,7 @@ export async function domainsHandler(req, res, next) {
       } catch (error) {
         throw new Error("Erro ao obter conteúdo do arquivo: " + error.message);
       }
+
     } catch (error) {
       /* Logar erro apenas em ambiente de desenvolvimento */
       if (process.env.NODE_ENV === "development") {
