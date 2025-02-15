@@ -33,8 +33,8 @@ export async function aaPanelWebsitesDelete(req, res) {
     });
     if (!website)
       return res.status(400).json({ message: "Site não encontrado" });
-    if (website.status === "CLONING")
-      return res.status(400).json({ message: "Clonagem em andamento" });
+    // if (website.status === "CLONING")
+    //   return res.status(400).json({ message: "Clonagem em andamento" });
 
     // TODO: Refactor Domain System
     /* Definir caminhos dos diretórios */
