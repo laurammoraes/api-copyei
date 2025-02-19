@@ -6,6 +6,7 @@ export async function validateUrl(url) {
     const response = await axios.get(url);
     return response.status === 200;
   } catch (error) {
+    console.log('Erro na validação da existencia da url'+ error)
     return false;
   }
 }
