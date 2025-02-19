@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z, ZodError } from "zod";
 
 import { prisma } from "../../lib/prisma.js";
 

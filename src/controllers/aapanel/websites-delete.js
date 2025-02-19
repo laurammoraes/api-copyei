@@ -4,9 +4,12 @@ import path from "path";
 import axios from "axios";
 import https from "https";
 import { z, ZodError } from "zod";
+import { google } from "googleapis";
 
 import { prisma } from "../../../src/lib/prisma.js";
 import { aaPanelSignature } from "../../utils/aaPanelSignature.js";
+import { oauth2Client } from "../../lib/google-oauth.js";
+import { getValidAccessToken } from "../../utils/getGoogleAccessToken.js";
 
 const aaPanelWebsitesDeleteParams = z.object({
   websiteId: z.coerce.number(),
@@ -44,6 +47,7 @@ export async function aaPanelWebsitesDelete(req, res) {
       domain
     );
 
+    /* Deletar website quando estiver no servidor da Copyei */
     const hasDirectory = existsSync(siteDirectory);
     /* Verificar se o diretório existe, e caso exista, deletar o diretório do site clonado */
     if (hasDirectory) {
@@ -58,6 +62,27 @@ export async function aaPanelWebsitesDelete(req, res) {
         user_id: user.id,
       },
     });
+
+    /* Deletar website quando estiver no Google Drive */
+    if (website.type === "DRIVE" && website.driveFolderId) {
+      const userGoogleCredentials = await getValidAccessToken(website.user_id);
+
+      /* Validar credenciais antes de configurá-las */
+      if (
+        !userGoogleCredentials.access_token ||
+        !userGoogleCredentials.refresh_token
+      ) {
+        throw new Error("Credenciais inválidas ou ausentes para o usuário.");
+      }
+
+      /* Obter instância do Google Drive */
+      oauth2Client.setCredentials({
+        access_token: userGoogleCredentials.access_token,
+        refresh_token: userGoogleCredentials.refresh_token,
+      });
+      const drive = google.drive({ version: "v3", auth: oauth2Client });
+      await drive.files.delete({ fileId: website.driveFolderId });
+    }
 
     // TODO: Refactor Domain System
     /* Deletar registro no aaPanel, caso exista */
@@ -94,7 +119,7 @@ export async function aaPanelWebsitesDelete(req, res) {
         errors: error.flatten().fieldErrors,
       });
     }
-    
+
     console.error(error);
     return res
       .status(500)
