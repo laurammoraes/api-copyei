@@ -9,21 +9,34 @@ const uploadToDriveQueue = new Queue("drive", {
     password: process.env.REDIS_PASSWORD,
   },
   defaultJobOptions: {
-    removeOnComplete: true, // Remove on complete
+    removeOnComplete: true, 
+    attempts: 3, 
+    timeout: 30000,
+    backoff: {
+      type: "fixed",
+      delay: 5000,
+    },
+    removeOnFail: false,  
   },
 });
 
-/* Catch Redis Connection Error */
-uploadToDriveQueue.on("error", () => {
-  throw new Error("Não foi possível estabelecer conexão com o banco de dados");
+uploadToDriveQueue.on("failed", (job, err) => {
+  console.error(`Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}`);
 });
 
-uploadToDriveQueue.process(async (job, done) => {
-  await uploadWebsiteToDrive(job.data.websiteDomain, job.data.decodedJWT);
-
-  done();
+uploadToDriveQueue.process(5, async (job) => {
+  try {
+    await uploadWebsiteToDrive(job.data.websiteDomain, job.data.decodedJWT);
+  } catch (error) {
+    console.error(`Erro ao processar job ${job.id}: ${error.message}`);
+    throw error; 
+  }
 });
 
 export async function uploadToDrive(websiteDomain, decodedJWT) {
+  if (!websiteDomain || !decodedJWT) {
+    throw new Error("Parâmetros inválidos: websiteDomain e decodedJWT são obrigatórios");
+  }
   await uploadToDriveQueue.add({ websiteDomain, decodedJWT });
 }
+

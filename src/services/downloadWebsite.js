@@ -5,7 +5,7 @@ import axios from "axios";
 
 import { prisma } from "../lib/prisma.js";
 
-// Carrega variáveis de ambiente
+
 dotenv.config();
 
 export async function downloadWebsite(siteId, url, domain, title) {
