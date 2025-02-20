@@ -61,7 +61,7 @@ export async function cloneWebSite(req, res) {
     const website = await prisma.websites.findFirst({
       where: { title },
     });
-    if (website) return res.status(400).json({ message: "Site já existente" });
+    if (website) return res.status(400).json({ message: "Nome do site inválido. Dê um novo nome ao seu site!" });
 
   
     const siteDirectory = path.join(
