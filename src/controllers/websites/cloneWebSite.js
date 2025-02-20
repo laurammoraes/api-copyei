@@ -38,7 +38,7 @@ export async function cloneWebSite(req, res) {
     const isValidUrl = await validateUrl(url);
 
     if (!isValidUrl)
-      return res.status(400).json({ message: "URL não encontrada" });
+      return res.status(200).json({ message: "URL não encontrada" });
 
    
     const userData = await prisma.users.findUnique({
@@ -46,7 +46,7 @@ export async function cloneWebSite(req, res) {
     });
 
     if (!userData)
-      return res.status(400).json({ message: "Usuário não encontrado" });
+      return res.status(200).json({ message: "Usuário não encontrado" });
 
    
     const thisDomain = await prisma.domains.findUnique({
@@ -54,14 +54,14 @@ export async function cloneWebSite(req, res) {
     });
 
     if (!thisDomain)
-      return res.status(400).json({ message: "Domínio não encontrado" });
+      return res.status(200).json({ message: "Domínio não encontrado" });
 
     
     //TO-DO: REVER ESSA VALIDAÇÃO E A MENSAGEM DE ERRO AO USUÁRIO
     const website = await prisma.websites.findFirst({
       where: { title },
     });
-    if (website) return res.status(400).json({ message: "Nome do site inválido. Dê um novo nome ao seu site!" });
+    if (website) return res.status(200).json({ message: "Site já existente" });
 
   
     const siteDirectory = path.join(
@@ -71,7 +71,7 @@ export async function cloneWebSite(req, res) {
 
     
     if (fs.existsSync(siteDirectory))
-      return res.status(400).json({ message: "Site já existente" });
+      return res.status(200).json({ message: "Site já existente" });
 
    
     const data = await prisma.websites.create({
