@@ -8,15 +8,23 @@ export async function getValidAccessToken(userId) {
 
   if (!userToken) throw new Error("Usuário não encontrado");
 
+  console.log('Expires at:', userToken.expires_at);
+  console.log('Today:', today);
+  console.log('Comparison:', new Date(userToken.expires_at).getTime() - today.getTime());
+
   /* Comparar data de hoje */
   const today = new Date();
-  const bufferTime = 5 * 60 * 1000; // 5 minutos de margem
-  if (new Date(userToken.expires_at).getTime() - bufferTime > today.getTime()) {
+  const expiresAt = new Date(userToken.expires_at);
+
+  if (expiresAt > today) {
     return {
       access_token: userToken.access_token,
       refresh_token: userToken.refresh_token,
     };
   }
+
+  
+
 
 
   /* Atualizar access_token se necessário */
