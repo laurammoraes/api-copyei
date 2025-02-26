@@ -1,125 +1,29 @@
-import { google } from "googleapis";
-import { existsSync, createReadStream } from "fs";
-import fs from "fs/promises";
-import path from "path";
-import mime from "mime-types";
+import Queue from "bull";
 
-import { oauth2Client } from "../lib/google-oauth.js";
-import { prisma } from "../lib/prisma.js";
+import { uploadWebsiteToDrive } from "../services/uploadWebsiteToDrive.js";
 
-async function uploadFolderToDrive(drive, localPath, driveParentId) {
-  /* Ler conteúdo do diretório */
-  const entries = await fs.readdir(localPath, { withFileTypes: true });
+const uploadToDriveQueue = new Queue("drive", {
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD,
+  },
+  defaultJobOptions: {
+    removeOnComplete: true, // Remove on complete
+  },
+});
 
-  for (const entry of entries) {
-    const entryPath = path.join(localPath, entry.name);
+/* Catch Redis Connection Error */
+uploadToDriveQueue.on("error", () => {
+  throw new Error("Não foi possível estabelecer conexão com o banco de dados");
+});
 
-    /* Fazer distinção entre arquivo e pasta */
-    if (entry.isDirectory()) {
-      /* Se for uma pasta, criar sua equivalência no Google Drive */
-      const folderMetadata = {
-        name: entry.name,
-        mimeType: "application/vnd.google-apps.folder",
-        parents: [driveParentId],
-      };
+uploadToDriveQueue.process(async (job, done) => {
+  await uploadWebsiteToDrive(job.data.websiteDomain, job.data.decodedJWT);
 
-      /* Criar pasta no Google Drive */
-      const folderResponse = await drive.files.create({
-        requestBody: folderMetadata,
-        fields: "id",
-      });
+  done();
+});
 
-      const folderId = folderResponse.data.id;
-
-      /* Recursividade para enviar os arquivos dos subdiretórios */
-      await uploadFolderToDrive(drive, entryPath, folderId);
-    } else if (entry.isFile()) {
-      /* Definir metadados do arquivo */
-      const fileMetadata = {
-        name: entry.name,
-        parents: [driveParentId],
-      };
-      const media = {
-        mimeType: mime.lookup(entryPath) || "application/octet-stream",
-        body: createReadStream(entryPath),
-      };
-
-      /* Criar arquivo no Google Drive */
-      const fileResponse = await drive.files.create({
-        requestBody: fileMetadata,
-        media: media,
-        fields: "id, webViewLink, webContentLink",
-      });
-
-      /* Tornar o arquivo público */
-      await drive.permissions.create({
-        fileId: fileResponse.data.id,
-        requestBody: {
-          role: "reader",
-          type: "anyone",
-        },
-      });
-    }
-  }
-}
-
-export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
-  /* Definir o caminho do arquivo para fazer upload */
-  const websiteDirectory = path.join(
-    process.env.COPYEI_WEBSITES_OUTPUT_DIRECTORY,
-    websiteDomain
-  );
-
-  /* Verificar se o diretório existe */
-  if (!existsSync(websiteDirectory)) {
-    throw new Error("Arquivo local não encontrado");
-  }
-
-  /* Obter credenciais do Google Drive */
-  oauth2Client.setCredentials(decodedJWT);
-  const drive = google.drive({ version: "v3", auth: oauth2Client });
-
-  try {
-    const folderMetadata = {
-      name: `www.copyei-${websiteDomain}`,
-      mimeType: "application/vnd.google-apps.folder",
-    };
-
-    /* Criar uma pasta dentro go google drive */
-    const folderResponse = await drive.files.create({
-      requestBody: folderMetadata,
-      fields: "id",
-    });
-
-    const rootFolderId = folderResponse.data.id;
-
-    /* Tornar a pasta pública */
-    await drive.permissions.create({
-      fileId: rootFolderId,
-      requestBody: {
-        role: "reader",
-        type: "anyone",
-      },
-    });
-
-    await uploadFolderToDrive(drive, websiteDirectory, rootFolderId);
-
-    /* Atualizar site */
-    await prisma.websites.update({
-      where: {
-        title: websiteDomain,
-      },
-      data: {
-        type: "DRIVE",
-        driveFolderId: rootFolderId,
-      },
-    });
-
-    /* Delete pasta local */
-    await fs.rm(websiteDirectory, { recursive: true });
-  } catch (error) {
-    console.error(
-      `Erro ao fazer upload do site no Google Drive: ${error.message}`
-    );
-  }
+export async function uploadToDrive(websiteDomain, decodedJWT) {
+  await uploadToDriveQueue.add({ websiteDomain, decodedJWT });
 }
