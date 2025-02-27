@@ -15,6 +15,21 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function isTokenExpired(token) {
+  const now = Math.floor(Date.now() / 1000); // Tempo atual em segundos
+  return token.exp && token.exp < now;
+}
+
+async function refreshToken() {
+  try {
+    const { credentials } = await oauth2Client.refreshAccessToken();
+    return credentials;
+  } catch (error) {
+    console.error("Erro ao renovar token:", error);
+    throw new Error("Falha na renovação do token");
+  }
+}
+
 async function createPublicFile(drive, fileMetadata, media) {
   try {
     const fileResponse = await drive.files.create({
@@ -85,6 +100,14 @@ async function uploadFolderToDrive(drive, localPath, driveParentId) {
 }
 
 export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
+
+  if (isTokenExpired(decodedJWT)) {
+    console.log("Token expirado, renovando...");
+    decodedJWT = await refreshToken();
+  }
+
+  oauth2Client.setCredentials(decodedJWT);
+  const drive = google.drive({ version: "v3", auth: oauth2Client });
   
   const websiteDirectory = path.join(
     process.env.COPYEI_WEBSITES_OUTPUT_DIRECTORY,
@@ -103,8 +126,7 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
   await removeEditabilityFromSite(websiteDirectory);
 
 
-  oauth2Client.setCredentials(decodedJWT);
-  const drive = google.drive({ version: "v3", auth: oauth2Client });
+  
 
   try {
     const folderMetadata = {
