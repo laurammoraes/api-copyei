@@ -11,7 +11,7 @@ const uploadToDriveQueue = new Queue("drive", {
   defaultJobOptions: {
     removeOnComplete: true, 
     attempts: 3, 
-    timeout: 30000,
+    // timeout: 30000,
     backoff: {
       type: "fixed",
       delay: 5000,
