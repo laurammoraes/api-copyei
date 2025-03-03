@@ -32,10 +32,10 @@ async function refreshToken() {
 
 async function createPublicFile(drive, fileMetadata, media) {
   try {
-    if (isTokenExpired(oauth2Client.credentials)) {
+    // Renova o token antes de enviar o arquivo
+    if (oauth2Client.isTokenExpiring()) {
       console.log("🔄 Renovando token...");
-      const { token } = await oauth2Client.getAccessToken();
-      oauth2Client.setCredentials({ access_token: token });
+      await oauth2Client.refreshAccessToken();
     }
 
     const fileResponse = await drive.files.create({
@@ -61,20 +61,22 @@ async function createPublicFile(drive, fileMetadata, media) {
 }
 
 
-
 async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 5) {
   const entries = await fs.readdir(localPath, { withFileTypes: true });
 
-  const folders = entries.filter(entry => entry.isDirectory()).map(entry => ({
-    name: entry.name,
-    path: path.join(localPath, entry.name),
-  }));
+  const folders = [];
+  const files = [];
 
-  const files = entries.filter(entry => entry.isFile()).map(entry => ({
-    name: entry.name,
-    path: path.join(localPath, entry.name),
-  }));
+  for (const entry of entries) {
+    const entryPath = path.join(localPath, entry.name);
+    if (entry.isDirectory()) {
+      folders.push({ name: entry.name, path: entryPath });
+    } else if (entry.isFile()) {
+      files.push({ name: entry.name, path: entryPath });
+    }
+  }
 
+  const folderIds = {};
   for (const folder of folders) {
     const folderMetadata = {
       name: folder.name,
@@ -83,11 +85,17 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
     };
 
     try {
+      if (oauth2Client.isTokenExpiring()) {
+        console.log("🔄 Renovando token antes de criar a pasta...");
+        await oauth2Client.refreshAccessToken();
+      }
+
       const folderResponse = await drive.files.create({
         requestBody: folderMetadata,
         fields: "id",
       });
 
+      folderIds[folder.name] = folderResponse.data.id;
       await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
     } catch (error) {
       console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
