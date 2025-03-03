@@ -25,9 +25,12 @@ uploadToDriveQueue.on("failed", (job, err) => {
 });
 
 uploadToDriveQueue.process(5, async (job) => {
- 
+  try {
     await uploadWebsiteToDrive(job.data.websiteDomain, job.data.decodedJWT);
- 
+  } catch (error) {
+    console.error(`Erro ao processar job ${job.id}: ${error.message}`);
+    throw error; 
+  }
 });
 
 export async function uploadToDrive(websiteDomain, decodedJWT) {

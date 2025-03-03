@@ -32,31 +32,19 @@ async function refreshToken() {
 
 async function createPublicFile(drive, fileMetadata, media) {
   try {
-
-
-    const tokenInfo = await oauth2Client.getAccessToken();
-  
-    if (!tokenInfo || !tokenInfo.token) {
-      console.log("🔄 Token ausente ou inválido, renovando...");
-      const { credentials } = await oauth2Client.refreshAccessToken();
-      oauth2Client.setCredentials(credentials);
-    } else {
-      console.log("✅ Token válido.");
-
-    }
     // Renova o token antes de enviar o arquivo
-    // if (oauth2Client.isTokenExpiring()) {
-    //   console.log("🔄 Renovando token...");
-    //   await oauth2Client.refreshAccessToken();
-    // }
+    if (oauth2Client.isTokenExpiring()) {
+      console.log("🔄 Renovando token...");
+      await oauth2Client.refreshAccessToken();
+    }
 
     const fileResponse = await drive.files.create({
       requestBody: fileMetadata,
       media: media,
-      fields: "id, webViewLink",
+      fields: "id, webViewLink, webContentLink",
     });
 
-    await sleep(5000);
+    await sleep(1000);
 
     await drive.permissions.create({
       fileId: fileResponse.data.id,
@@ -66,51 +54,52 @@ async function createPublicFile(drive, fileMetadata, media) {
       },
     });
 
-    await sleep(2000); 
     console.log(`✅ Arquivo ${fileMetadata.name} enviado e tornado público.`);
   } catch (error) {
     console.error(`❌ Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
   }
 }
 
-async function ensureValidToken() {
-  const tokenInfo = await oauth2Client.getAccessToken();
-  if (!tokenInfo || !tokenInfo.token) {
-    console.log("🔄 Token ausente ou inválido, renovando...");
-    const { credentials } = await oauth2Client.refreshAccessToken();
-    oauth2Client.setCredentials(credentials);
-  }
-}
 
 async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 5) {
   const entries = await fs.readdir(localPath, { withFileTypes: true });
 
+  const folders = [];
+  const files = [];
 
-  const folders = entries.filter(entry => entry.isDirectory())
-                        .map(entry => ({ name: entry.name, path: path.join(localPath, entry.name) }));
-
-  const files = entries.filter(entry => entry.isFile())
-                      .map(entry => ({ name: entry.name, path: path.join(localPath, entry.name) }));
-
+  for (const entry of entries) {
+    const entryPath = path.join(localPath, entry.name);
+    if (entry.isDirectory()) {
+      folders.push({ name: entry.name, path: entryPath });
+    } else if (entry.isFile()) {
+      files.push({ name: entry.name, path: entryPath });
+    }
+  }
 
   const folderIds = {};
   for (const folder of folders) {
-    await ensureValidToken(); // Verifica e renova o token antes de cada ação crítica
-
     const folderMetadata = {
       name: folder.name,
       mimeType: "application/vnd.google-apps.folder",
       parents: [driveParentId],
     };
 
+    try {
+      if (oauth2Client.isTokenExpiring()) {
+        console.log("🔄 Renovando token antes de criar a pasta...");
+        await oauth2Client.refreshAccessToken();
+      }
 
-    const folderResponse = await drive.files.create({
-      requestBody: folderMetadata,
-      fields: "id",
-    });
+      const folderResponse = await drive.files.create({
+        requestBody: folderMetadata,
+        fields: "id",
+      });
 
-    await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
-
+      folderIds[folder.name] = folderResponse.data.id;
+      await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
+    } catch (error) {
+      console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
+    }
   }
 
   for (let i = 0; i < files.length; i += batchSize) {
@@ -118,9 +107,10 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
 
     await Promise.all(
       batch.map(async (file) => {
-        await ensureValidToken(); // Verifica o token antes de cada upload de arquivo
-
-        const fileMetadata = { name: file.name, parents: [driveParentId] };
+        const fileMetadata = {
+          name: file.name,
+          parents: [driveParentId],
+        };
         const media = {
           mimeType: mime.lookup(file.path) || "application/octet-stream",
           body: createReadStream(file.path),
@@ -133,8 +123,6 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
     console.log(`✅ Lote de ${batch.length} arquivos enviado.`);
   }
 }
-
-
 
 
 
@@ -216,76 +204,3 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
     );
   }
 }
-
-
-// async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 5) {
-//   const entries = await fs.readdir(localPath, { withFileTypes: true });
-
-//   const folders = [];
-//   const files = [];
-
-//   for (const entry of entries) {
-//     const entryPath = path.join(localPath, entry.name);
-//     if (entry.isDirectory()) {
-//       folders.push({ name: entry.name, path: entryPath });
-//     } else if (entry.isFile()) {
-//       files.push({ name: entry.name, path: entryPath });
-//     }
-//   }
-
-//   const folderIds = {};
-//   for (const folder of folders) {
-//     const folderMetadata = {
-//       name: folder.name,
-//       mimeType: "application/vnd.google-apps.folder",
-//       parents: [driveParentId],
-//     };
-
-//     // try {
-//       // if (oauth2Client.isTokenExpiring()) {
-//       //   console.log("🔄 Renovando token antes de criar a pasta...");
-//       //   await oauth2Client.refreshAccessToken();
-//       // }
-//       const tokenInfo = await oauth2Client.getAccessToken();
-  
-//       if (!tokenInfo || !tokenInfo.token) {
-//         console.log("🔄 Token ausente ou inválido, renovando...");
-//         const { credentials } = await oauth2Client.refreshAccessToken();
-//         oauth2Client.setCredentials(credentials);
-//       } else {
-//         console.log("✅ Token válido.");
-//       }
-
-//       const folderResponse = await drive.files.create({
-//         requestBody: folderMetadata,
-//         fields: "id",
-//       });
-
-//       folderIds[folder.name] = folderResponse.data.id;
-//       await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
-//     // } catch (error) {
-//     //   console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
-//     // }
-//   }
-
-//   for (let i = 0; i < files.length; i += batchSize) {
-//     const batch = files.slice(i, i + batchSize);
-
-//     await Promise.all(
-//       batch.map(async (file) => {
-//         const fileMetadata = {
-//           name: file.name,
-//           parents: [driveParentId],
-//         };
-//         const media = {
-//           mimeType: mime.lookup(file.path) || "application/octet-stream",
-//           body: createReadStream(file.path),
-//         };
-
-//         await createPublicFile(drive, fileMetadata, media);
-//       })
-//     );
-
-//     console.log(`✅ Lote de ${batch.length} arquivos enviado.`);
-//   }
-// }
