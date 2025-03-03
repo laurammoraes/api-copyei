@@ -33,6 +33,7 @@ async function refreshToken() {
 async function createPublicFile(drive, fileMetadata, media) {
   try {
 
+
     const tokenInfo = await oauth2Client.getAccessToken();
   
     if (!tokenInfo || !tokenInfo.token) {
@@ -41,6 +42,7 @@ async function createPublicFile(drive, fileMetadata, media) {
       oauth2Client.setCredentials(credentials);
     } else {
       console.log("✅ Token válido.");
+
     }
     // Renova o token antes de enviar o arquivo
     // if (oauth2Client.isTokenExpiring()) {
@@ -80,9 +82,9 @@ async function ensureValidToken() {
   }
 }
 
-
 async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 5) {
   const entries = await fs.readdir(localPath, { withFileTypes: true });
+
 
   const folders = entries.filter(entry => entry.isDirectory())
                         .map(entry => ({ name: entry.name, path: path.join(localPath, entry.name) }));
@@ -90,6 +92,8 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
   const files = entries.filter(entry => entry.isFile())
                       .map(entry => ({ name: entry.name, path: path.join(localPath, entry.name) }));
 
+
+  const folderIds = {};
   for (const folder of folders) {
     await ensureValidToken(); // Verifica e renova o token antes de cada ação crítica
 
@@ -99,12 +103,14 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
       parents: [driveParentId],
     };
 
+
     const folderResponse = await drive.files.create({
       requestBody: folderMetadata,
       fields: "id",
     });
 
     await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
+
   }
 
   for (let i = 0; i < files.length; i += batchSize) {
