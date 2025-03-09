@@ -1,9 +1,9 @@
 import { existsSync } from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
-
 import { prisma } from "../../lib/prisma.js";
 import { uploadToDrive } from "../../queue/sendWebsiteToDriveQueue.js";
+import { refreshOauthToken, validateOauthToken } from "../../lib/google-oauth.js";
 
 export async function uploadWebsiteToDrive(req, res) {
   /* Validar usuário */
@@ -28,6 +28,7 @@ export async function uploadWebsiteToDrive(req, res) {
       title: websiteDomain,
     },
   });
+
   if (!website) return res.status(400).json({ message: "Site não encontrado" });
 
   /* Verificar se é o proprietário do site que está fazendo essa requisição */
@@ -56,15 +57,69 @@ export async function uploadWebsiteToDrive(req, res) {
   if (!decoded) return res.status(401).json({ message: "Not Authorized" });
 
   try {
+
+    const tokens = await validateToken(decoded, user)
+ 
+    const jwtToken = jwt.sign(tokens, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    
+    res.cookie("copyei_drive", jwtToken, {
+      expiresIn: "1d",
+    });
+
     /* Enviar para fila de clonagem */
     await uploadToDrive(websiteDomain, decoded);
 
     return res.json({ message: "OK" });
   } catch (error) {
     console.error(error);
+    res.clearCookie("copyei_drive");
     return res
       .status(500)
       .json({ message: "Erro ao fazer upload do site no Google Drive" });
   }
-}
+
+ async function validateToken(driveDecodedToken, user) {
+    try {
+      const isValidated = await validateOauthToken(driveDecodedToken.access_token)
+
+      if(isValidated){
+        const {
+          iat,
+          exp,
+          ...rest
+        } = driveDecodedToken
+        return rest
+      }
+
+      const credentials = await refreshOauthToken(driveDecodedToken.access_token, driveDecodedToken.refresh_token)
+    
+      const { access_token, refresh_token, expiry_date } = credentials
+      
+      await prisma.googleCredentials.upsert({
+        where: {
+          user_id: user.id,
+        },
+        create: {
+          user_id: user.id,
+          refresh_token: refresh_token,
+          access_token: access_token,
+          expires_at: new Date(expiry_date),
+        },
+        update: {
+          refresh_token: refresh_token,
+          access_token: access_token,
+          expires_at: new Date(expiry_date),
+        },
+      });
+
+      return credentials;
+
+    } catch (error) {
+
+      console.error("Erro ao renovar token:", error);
+      throw new Error("Falha na renovação do token");
+    }
+  }
 }
