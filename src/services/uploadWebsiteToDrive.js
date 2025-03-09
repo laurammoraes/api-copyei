@@ -15,21 +15,6 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function isTokenExpired(token) {
-  const now = Math.floor(Date.now() / 1000); // Tempo atual em segundos
-  return token.exp && token.exp < now;
-}
-
-async function refreshToken() {
-  try {
-    const { credentials } = await oauth2Client.refreshAccessToken();
-    return credentials;
-  } catch (error) {
-    console.error("Erro ao renovar token:", error);
-    throw new Error("Falha na renovação do token");
-  }
-}
-
 async function createPublicFile(drive, fileMetadata, media) {
   try {
     // Renova o token antes de enviar o arquivo
@@ -127,11 +112,6 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
 
 
 export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
-
-  if (isTokenExpired(decodedJWT)) {
-    console.log("Token expirado, renovando...");
-    decodedJWT = await refreshToken();
-  }
 
   oauth2Client.setCredentials(decodedJWT);
   const drive = google.drive({ version: "v3", auth: oauth2Client });
