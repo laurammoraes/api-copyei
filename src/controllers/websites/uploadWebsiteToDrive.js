@@ -28,6 +28,7 @@ export async function uploadWebsiteToDrive(req, res) {
       title: websiteDomain,
     },
   });
+
   if (!website) return res.status(400).json({ message: "Site não encontrado" });
 
   /* Verificar se é o proprietário do site que está fazendo essa requisição */
@@ -80,46 +81,45 @@ export async function uploadWebsiteToDrive(req, res) {
   }
 
  async function validateToken(driveDecodedToken, user) {
- 
-  try {
-    const isValidated = await validateOauthToken(driveDecodedToken.access_token)
+    try {
+      const isValidated = await validateOauthToken(driveDecodedToken.access_token)
 
-    if(isValidated){
-      const {
-        iat,
-        exp,
-        ...rest
-      } = driveDecodedToken
-      return rest
-    }
+      if(isValidated){
+        const {
+          iat,
+          exp,
+          ...rest
+        } = driveDecodedToken
+        return rest
+      }
 
-    const credentials = await refreshOauthToken(driveDecodedToken.access_token, driveDecodedToken.refresh_token)
-  
-    const { access_token, refresh_token, expiry_date } = credentials
+      const credentials = await refreshOauthToken(driveDecodedToken.access_token, driveDecodedToken.refresh_token)
     
-    await prisma.googleCredentials.upsert({
-      where: {
-        user_id: user.id,
-      },
-      create: {
-        user_id: user.id,
-        refresh_token: refresh_token,
-        access_token: access_token,
-        expires_at: new Date(expiry_date),
-      },
-      update: {
-        refresh_token: refresh_token,
-        access_token: access_token,
-        expires_at: new Date(expiry_date),
-      },
-    });
+      const { access_token, refresh_token, expiry_date } = credentials
+      
+      await prisma.googleCredentials.upsert({
+        where: {
+          user_id: user.id,
+        },
+        create: {
+          user_id: user.id,
+          refresh_token: refresh_token,
+          access_token: access_token,
+          expires_at: new Date(expiry_date),
+        },
+        update: {
+          refresh_token: refresh_token,
+          access_token: access_token,
+          expires_at: new Date(expiry_date),
+        },
+      });
 
-    return credentials;
+      return credentials;
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error("Erro ao renovar token:", error);
-    throw new Error("Falha na renovação do token");
+      console.error("Erro ao renovar token:", error);
+      throw new Error("Falha na renovação do token");
+    }
   }
-}
 }
