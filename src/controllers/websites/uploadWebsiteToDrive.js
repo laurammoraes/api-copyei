@@ -54,7 +54,11 @@ export async function uploadWebsiteToDrive(req, res) {
 
   /* Validar JWT token */
   const decoded = jwt.verify(copyei_drive, process.env.JWT_SECRET);
-  if (!decoded) return res.status(401).json({ message: "Not Authorized" });
+  
+  if (!decoded) {
+    res.clearCookie("copyei_drive");
+    return res.status(401).json({ message: "Not Authorized" });
+  }
 
   try {
 
