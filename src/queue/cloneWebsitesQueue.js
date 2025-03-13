@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import * as cheerio from "cheerio";
 
-import { downloadWebsite } from "../services/downloadWebsite.js";
+
 
 const cloneWebsitesQueue = new Queue("clone", {
   redis: {
@@ -53,23 +53,23 @@ cloneWebsitesQueue.process(async (job) => {
     const $ = cheerio.load(htmlContent);
 
 
-  
-  if (!fs.existsSync(indexPath)) {
-    throw new Error("Erro: index.html não foi clonado corretamente.");
-  }
 
-  
-  const htmlContent = fs.readFileSync(indexPath, "utf-8");
-  const $ = cheerio.load(htmlContent);
-  const missingFiles = [];
-
-  
-  $("img").each((_, img) => {
-    const src = $(img).attr("src");
-    if (src && !fs.existsSync(path.join(clonePath, src))) {
-      missingFiles.push(src);
+    if (!fs.existsSync(indexPath)) {
+      throw new Error("Erro: index.html não foi clonado corretamente.");
     }
-  });
+
+
+    const htmlContent = fs.readFileSync(indexPath, "utf-8");
+    const $ = cheerio.load(htmlContent);
+    const missingFiles = [];
+
+
+    $("img").each((_, img) => {
+      const src = $(img).attr("src");
+      if (src && !fs.existsSync(path.join(clonePath, src))) {
+        missingFiles.push(src);
+      }
+    });
 
 
     if (missingFiles.length > 0) {
@@ -80,18 +80,18 @@ cloneWebsitesQueue.process(async (job) => {
     }
   });
 
-  
-  if (missingFiles.length > 0) {
-    throw new Error(`Erro: Os seguintes arquivos estão ausentes na clonagem: ${missingFiles.join(", ")}`);
-  }
 
-  console.log(`Clonagem validada para site ${siteId}`);
+if (missingFiles.length > 0) {
+  throw new Error(`Erro: Os seguintes arquivos estão ausentes na clonagem: ${missingFiles.join(", ")}`);
+}
+
+console.log(`Clonagem validada para site ${siteId}`);
 }
 
 cloneWebsitesQueue.process(async (job) => {
   try {
     await downloadWebsite(job.data.siteId, job.data.url, job.data.domain, job.data.title);
-    await validateClone(job.data.siteId); 
+    await validateClone(job.data.siteId);
   } catch (error) {
     console.error('Erro ao processar job: ${error.message}');
     throw error;
