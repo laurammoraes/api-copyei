@@ -1,6 +1,11 @@
 import Queue from "bull";
 
 import { downloadWebsite } from "../services/downloadWebsite.js";
+import fs from "fs";
+import path from "path";
+import * as cheerio from "cheerio";
+
+import { downloadWebsite } from "../services/downloadWebsite.js";
 
 const cloneWebsitesQueue = new Queue("clone", {
   redis: {
@@ -22,6 +27,7 @@ const cloneWebsitesQueue = new Queue("clone", {
 cloneWebsitesQueue.on("failed", (job, err) => {
   console.error('Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}');
 });
+
 
 
 cloneWebsitesQueue.process(async (job) => {
@@ -46,32 +52,46 @@ cloneWebsitesQueue.process(async (job) => {
     const htmlContent = fs.readFileSync(indexPath, "utf8");
     const $ = cheerio.load(htmlContent);
 
-    let missingFiles = [];
 
-    // Verificar arquivos CSS
-    $("link[rel='stylesheet']").each((_, element) => {
-      const cssFile = $(element).attr("href");
-      if (cssFile && !fs.existsSync(path.join(websitePath, cssFile))) {
-        missingFiles.push(cssFile);
-      }
-    });
+  
+  if (!fs.existsSync(indexPath)) {
+    throw new Error("Erro: index.html não foi clonado corretamente.");
+  }
 
-    // Verificar imagens
-    $("img").each((_, element) => {
-      const imgFile = $(element).attr("src");
-      if (imgFile && !fs.existsSync(path.join(websitePath, imgFile))) {
-        missingFiles.push(imgFile);
-      }
-    });
+  
+  const htmlContent = fs.readFileSync(indexPath, "utf-8");
+  const $ = cheerio.load(htmlContent);
+  const missingFiles = [];
+
+  
+  $("img").each((_, img) => {
+    const src = $(img).attr("src");
+    if (src && !fs.existsSync(path.join(clonePath, src))) {
+      missingFiles.push(src);
+    }
+  });
+
 
     if (missingFiles.length > 0) {
       console.error("Erro: arquivos faltando", missingFiles);
       // await deleteWebsiteRecord(job.data.siteId);
       throw new Error("Arquivos necessários não foram clonados corretamente");
+
     }
+  });
 
-    console.log("Clonagem validada com sucesso");
+  
+  if (missingFiles.length > 0) {
+    throw new Error(`Erro: Os seguintes arquivos estão ausentes na clonagem: ${missingFiles.join(", ")}`);
+  }
 
+  console.log(`Clonagem validada para site ${siteId}`);
+}
+
+cloneWebsitesQueue.process(async (job) => {
+  try {
+    await downloadWebsite(job.data.siteId, job.data.url, job.data.domain, job.data.title);
+    await validateClone(job.data.siteId); 
   } catch (error) {
     console.error('Erro ao processar job: ${error.message}');
     throw error;
