@@ -10,12 +10,6 @@ dotenv.config();
 
 export async function downloadWebsite(siteId, url, domain, title) {
   try {
-
-    if (typeof siteId !== "string") siteId = String(siteId);
-    if (typeof url !== "string") url = String(url);
-    if (typeof domain !== "string") domain = String(domain);
-    if (typeof title !== "string") title = String(title);
-
     const siteDirectory = path.join(
       process.env.COPYEI_WEBSITES_OUTPUT_DIRECTORY,
       title
