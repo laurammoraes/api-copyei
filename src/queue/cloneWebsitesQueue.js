@@ -1,9 +1,6 @@
 import Queue from "bull";
-import fs from "fs";
-import path from "path";
-import * as cheerio from "cheerio";
-import { downloadWebsite } from "../services/downloadWebsite.js";
 
+import { downloadWebsite } from "../services/downloadWebsite.js";
 
 const cloneWebsitesQueue = new Queue("clone", {
   redis: {
@@ -23,19 +20,25 @@ const cloneWebsitesQueue = new Queue("clone", {
 });
 
 cloneWebsitesQueue.on("failed", (job, err) => {
-  console.error(`Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}`);
+  console.error('Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}');
 });
+
 
 cloneWebsitesQueue.process(async (job) => {
   try {
     const websitePath = path.join("/var/www/copyei_websites", job.data.title);
-    await downloadWebsite(job.data.siteId, job.data.url, job.data.domain, job.data.title);
+    await downloadWebsite(
+      job.data.siteId,
+      job.data.url,
+      job.data.domain,
+      job.data.title
+    );
 
     // Validação pós-clonagem
     const indexPath = path.join(websitePath, "index.html");
     if (!fs.existsSync(indexPath)) {
       console.error("Erro: index.html não encontrado");
-      // await deleteWebsiteRecord(job.data.siteId);
+      await deleteWebsiteRecord(job.data.siteId);
       throw new Error("index.html não foi clonado corretamente");
     }
 
@@ -63,14 +66,14 @@ cloneWebsitesQueue.process(async (job) => {
 
     if (missingFiles.length > 0) {
       console.error("Erro: arquivos faltando", missingFiles);
-      await deleteWebsiteRecord(job.data.siteId);
+      // await deleteWebsiteRecord(job.data.siteId);
       throw new Error("Arquivos necessários não foram clonados corretamente");
     }
 
     console.log("Clonagem validada com sucesso");
 
   } catch (error) {
-    console.error(`Erro ao processar job: ${error.message}`);
+    console.error('Erro ao processar job: ${error.message}');
     throw error;
   }
 });
@@ -79,6 +82,7 @@ export async function sendUrlToQueue(siteId, url, domain, title) {
   try {
     await cloneWebsitesQueue.add({ siteId, url, domain, title });
   } catch (error) {
-    console.error(`Erro ao adicionar job à fila: ${error.message}`);
+    console.error('Erro ao adicionar job à fila: ${error.message}');
   }
 }
+
