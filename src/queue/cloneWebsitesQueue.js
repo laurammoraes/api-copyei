@@ -1,9 +1,11 @@
 import Queue from "bull";
+
 import { downloadWebsite } from "../services/downloadWebsite.js";
 import fs from "fs";
 import path from "path";
 import * as cheerio from "cheerio";
 
+import { downloadWebsite } from "../services/downloadWebsite.js";
 
 const cloneWebsitesQueue = new Queue("clone", {
   redis: {
@@ -23,12 +25,33 @@ const cloneWebsitesQueue = new Queue("clone", {
 });
 
 cloneWebsitesQueue.on("failed", (job, err) => {
-  console.error(`Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}`);
+  console.error('Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}');
 });
 
-async function validateClone(siteId) {
-  const clonePath = path.join("clones", siteId);
-  const indexPath = path.join(clonePath, "index.html");
+
+
+cloneWebsitesQueue.process(async (job) => {
+  try {
+    const websitePath = path.join("/var/www/copyei_websites", job.data.title);
+    await downloadWebsite(
+      job.data.siteId,
+      job.data.url,
+      job.data.domain,
+      job.data.title
+    );
+
+    // Validação pós-clonagem
+    const indexPath = path.join(websitePath, "index.html");
+    if (!fs.existsSync(indexPath)) {
+      console.error("Erro: index.html não encontrado");
+      await deleteWebsiteRecord(job.data.siteId);
+      throw new Error("index.html não foi clonado corretamente");
+    }
+
+    // Analisar o HTML
+    const htmlContent = fs.readFileSync(indexPath, "utf8");
+    const $ = cheerio.load(htmlContent);
+
 
   
   if (!fs.existsSync(indexPath)) {
@@ -48,11 +71,12 @@ async function validateClone(siteId) {
     }
   });
 
-  
-  $("link[rel='stylesheet']").each((_, link) => {
-    const href = $(link).attr("href");
-    if (href && !fs.existsSync(path.join(clonePath, href))) {
-      missingFiles.push(href);
+
+    if (missingFiles.length > 0) {
+      console.error("Erro: arquivos faltando", missingFiles);
+      // await deleteWebsiteRecord(job.data.siteId);
+      throw new Error("Arquivos necessários não foram clonados corretamente");
+
     }
   });
 
@@ -69,7 +93,7 @@ cloneWebsitesQueue.process(async (job) => {
     await downloadWebsite(job.data.siteId, job.data.url, job.data.domain, job.data.title);
     await validateClone(job.data.siteId); 
   } catch (error) {
-    console.error(`Erro ao processar job: ${error.message}`);
+    console.error('Erro ao processar job: ${error.message}');
     throw error;
   }
 });
@@ -78,6 +102,7 @@ export async function sendUrlToQueue(siteId, url, domain, title) {
   try {
     await cloneWebsitesQueue.add({ siteId, url, domain, title });
   } catch (error) {
-    console.error(`Erro ao adicionar job à fila: ${error.message}`);
+    console.error('Erro ao adicionar job à fila: ${error.message}');
   }
 }
+
