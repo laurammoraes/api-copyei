@@ -1,7 +1,7 @@
 import scrape from "website-scraper";
 import path from "path";
 import dotenv from "dotenv";
-
+import axios from "axios";
 
 import { prisma } from "../lib/prisma.js";
 
