@@ -1,9 +1,9 @@
 import Queue from "bull";
 import fs from "fs";
 import path from "path";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import { downloadWebsite } from "../services/downloadWebsite.js";
-import { deleteWebsiteRecord } from "../services/database.js";
+
 
 const cloneWebsitesQueue = new Queue("clone", {
   redis: {
@@ -35,7 +35,7 @@ cloneWebsitesQueue.process(async (job) => {
     const indexPath = path.join(websitePath, "index.html");
     if (!fs.existsSync(indexPath)) {
       console.error("Erro: index.html não encontrado");
-      await deleteWebsiteRecord(job.data.siteId);
+      // await deleteWebsiteRecord(job.data.siteId);
       throw new Error("index.html não foi clonado corretamente");
     }
 
