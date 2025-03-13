@@ -2,7 +2,8 @@ import Queue from "bull";
 import { downloadWebsite } from "../services/downloadWebsite.js";
 import fs from "fs";
 import path from "path";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
+
 
 const cloneWebsitesQueue = new Queue("clone", {
   redis: {
