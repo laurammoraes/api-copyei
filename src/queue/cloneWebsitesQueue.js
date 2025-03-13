@@ -68,6 +68,7 @@ cloneWebsitesQueue.process(async (job) => {
     }
 
     console.log("Clonagem validada com sucesso");
+
   } catch (error) {
     console.error(`Erro ao processar job: ${error.message}`);
     throw error;
