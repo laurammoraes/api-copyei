@@ -30,17 +30,17 @@ async function validateClone(siteId) {
   const clonePath = path.join("clones", siteId);
   const indexPath = path.join(clonePath, "index.html");
 
-  
+
   if (!fs.existsSync(indexPath)) {
     throw new Error("Erro: index.html não foi clonado corretamente.");
   }
 
-  
+
   const htmlContent = fs.readFileSync(indexPath, "utf-8");
   const $ = cheerio.load(htmlContent);
   const missingFiles = [];
 
-  
+
   $("img").each((_, img) => {
     const src = $(img).attr("src");
     if (src && !fs.existsSync(path.join(clonePath, src))) {
@@ -48,7 +48,7 @@ async function validateClone(siteId) {
     }
   });
 
-  
+
   $("link[rel='stylesheet']").each((_, link) => {
     const href = $(link).attr("href");
     if (href && !fs.existsSync(path.join(clonePath, href))) {
@@ -56,7 +56,7 @@ async function validateClone(siteId) {
     }
   });
 
-  
+
   if (missingFiles.length > 0) {
     throw new Error(`Erro: Os seguintes arquivos estão ausentes na clonagem: ${missingFiles.join(", ")}`);
   }
@@ -66,8 +66,13 @@ async function validateClone(siteId) {
 
 cloneWebsitesQueue.process(async (job) => {
   try {
+
+    console.log("Processando job:", job.id);
+    console.log("Dados recebidos:", job.data);
+
+
     await downloadWebsite(job.data.siteId, job.data.url, job.data.domain, job.data.title);
-    await validateClone(job.data.siteId); 
+    await validateClone(job.data.siteId);
   } catch (error) {
     console.error(`Erro ao processar job: ${error.message}`);
     throw error;
