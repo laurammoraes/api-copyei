@@ -54,7 +54,7 @@ export async function uploadWebsiteToDrive(req, res) {
 
   /* Validar JWT token */
   const decoded = jwt.verify(copyei_drive, process.env.JWT_SECRET);
-  
+
   if (!decoded) {
     res.clearCookie("copyei_drive");
     return res.status(401).json({ message: "Not Authorized" });
@@ -63,17 +63,20 @@ export async function uploadWebsiteToDrive(req, res) {
   try {
 
     const tokens = await validateToken(decoded, user)
- 
+
     const jwtToken = jwt.sign(tokens, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
-    
+
     res.cookie("copyei_drive", jwtToken, {
       expiresIn: "1d",
     });
 
     /* Enviar para fila de clonagem */
-    await uploadToDrive(websiteDomain, decoded);
+    const teste = await uploadToDrive(websiteDomain, decoded);
+
+    console.log('-----------------')
+    console.log(teste)
 
     return res.json({ message: "OK" });
   } catch (error) {
@@ -84,11 +87,11 @@ export async function uploadWebsiteToDrive(req, res) {
       .json({ message: "Erro ao fazer upload do site no Google Drive" });
   }
 
- async function validateToken(driveDecodedToken, user) {
+  async function validateToken(driveDecodedToken, user) {
     try {
       const isValidated = await validateOauthToken(driveDecodedToken.access_token)
 
-      if(isValidated){
+      if (isValidated) {
         const {
           iat,
           exp,
@@ -98,9 +101,9 @@ export async function uploadWebsiteToDrive(req, res) {
       }
 
       const credentials = await refreshOauthToken(driveDecodedToken.access_token, driveDecodedToken.refresh_token)
-    
+
       const { access_token, refresh_token, expiry_date } = credentials
-      
+
       await prisma.googleCredentials.upsert({
         where: {
           user_id: user.id,
