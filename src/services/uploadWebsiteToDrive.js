@@ -17,7 +17,6 @@ function sleep(ms) {
 
 async function createPublicFile(drive, fileMetadata, media) {
   try {
-    // Renova o token antes de enviar o arquivo
     if (oauth2Client.isTokenExpiring()) {
       console.log("🔄 Renovando token...");
       await oauth2Client.refreshAccessToken();
@@ -40,8 +39,12 @@ async function createPublicFile(drive, fileMetadata, media) {
     });
 
     console.log(`✅ Arquivo ${fileMetadata.name} enviado e tornado público.`);
+    return fileResponse;
   } catch (error) {
     console.error(`❌ Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
+
+    throw new Error(`Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
+
   }
 }
 
@@ -84,35 +87,41 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
       await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
     } catch (error) {
       console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
+      throw new Error(`Erro ao criar pasta ${folder.name}: ${error.message}`);
     }
   }
 
   for (let i = 0; i < files.length; i += batchSize) {
     const batch = files.slice(i, i + batchSize);
 
-    await Promise.all(
-      batch.map(async (file) => {
-        const fileMetadata = {
-          name: file.name,
-          parents: [driveParentId],
-        };
-        const media = {
-          mimeType: mime.lookup(file.path) || "application/octet-stream",
-          body: createReadStream(file.path),
-        };
 
-        await createPublicFile(drive, fileMetadata, media);
-      })
-    );
+    try {
+      await Promise.all(
+        batch.map(async (file) => {
+          const fileMetadata = {
+            name: file.name,
+            parents: [driveParentId],
+          };
+          const media = {
+            mimeType: mime.lookup(file.path) || "application/octet-stream",
+            body: createReadStream(file.path),
+          };
 
-    console.log(`✅ Lote de ${batch.length} arquivos enviado.`);
+          await createPublicFile(drive, fileMetadata, media);
+        })
+      );
+
+      console.log(`✅ Lote de ${batch.length} arquivos enviado.`);
+    } catch (error) {
+      console.error(`❌ Erro no upload do lote de arquivos: ${error.message}`);
+      throw new Error(`Erro no upload do lote de arquivos: ${error.message}`);
+    }
+
   }
 }
 
 
-
 export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
-
   oauth2Client.setCredentials(decodedJWT);
   const drive = google.drive({ version: "v3", auth: oauth2Client });
 
@@ -121,19 +130,12 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
     websiteDomain
   );
 
-
   if (!existsSync(websiteDirectory)) {
     throw new Error("Arquivo local não encontrado");
   }
 
-
   await removeWatermark(websiteDirectory);
-
-
   await removeEditabilityFromSite(websiteDirectory);
-
-
-
 
   try {
     const folderMetadata = {
@@ -141,14 +143,12 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
       mimeType: "application/vnd.google-apps.folder",
     };
 
-
     const folderResponse = await drive.files.create({
       requestBody: folderMetadata,
       fields: "id",
     });
 
     const rootFolderId = folderResponse.data.id;
-
 
     await drive.permissions.create({
       fileId: rootFolderId,
@@ -160,7 +160,6 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
 
     await uploadFolderToDrive(drive, websiteDirectory, rootFolderId);
 
-
     await prisma.websites.update({
       where: {
         title: websiteDomain,
@@ -171,24 +170,16 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
       },
     });
 
-
     await fs.rm(websiteDirectory, { recursive: true });
-
 
     await updateLoadingState(websiteDomain);
 
-    console.log(`Upload de ${websiteDomain} concluído com sucesso.`);
-
-    return "Upload concluído com sucesso"
-
-
+    console.log(`✅ Upload de ${websiteDomain} concluído com sucesso.`);
+    return "Upload concluído com sucesso";
   } catch (error) {
 
+    console.error(`❌ Erro ao fazer upload do site no Google Drive: ${error.message}`);
+    throw new Error(`Erro ao fazer upload do site no Google Drive: ${error.message}`);
 
-    console.error(
-      `Erro ao fazer upload do site no Google Drive: ${error.message}`
-    );
-
-    return "Erro ao realizar upload"
   }
 }
