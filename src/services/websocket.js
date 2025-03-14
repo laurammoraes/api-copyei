@@ -20,7 +20,7 @@ export function startWebsocket(server) {
   });
 }
 
-export function updateLoadingState(website) {
+export async function updateLoadingState(website) {
   if (io) {
     io.to(`uploading-${website}`).emit("update-loading-state", website);
   }

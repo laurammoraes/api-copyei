@@ -115,25 +115,25 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
 
   oauth2Client.setCredentials(decodedJWT);
   const drive = google.drive({ version: "v3", auth: oauth2Client });
-  
+
   const websiteDirectory = path.join(
     process.env.COPYEI_WEBSITES_OUTPUT_DIRECTORY,
     websiteDomain
   );
 
-  
+
   if (!existsSync(websiteDirectory)) {
     throw new Error("Arquivo local não encontrado");
   }
 
-  
+
   await removeWatermark(websiteDirectory);
 
-  
+
   await removeEditabilityFromSite(websiteDirectory);
 
 
-  
+
 
   try {
     const folderMetadata = {
@@ -175,12 +175,20 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
     await fs.rm(websiteDirectory, { recursive: true });
 
 
-    updateLoadingState(websiteDomain);
+    await updateLoadingState(websiteDomain);
 
     console.log(`Upload de ${websiteDomain} concluído com sucesso.`);
+
+    return "Upload concluído com sucesso"
+
+
   } catch (error) {
+
+
     console.error(
       `Erro ao fazer upload do site no Google Drive: ${error.message}`
     );
+
+    return "Erro ao realizar upload"
   }
 }
