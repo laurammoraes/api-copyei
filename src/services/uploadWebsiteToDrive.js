@@ -9,42 +9,45 @@ import { prisma } from "../lib/prisma.js";
 import { removeWatermark } from "../utils/removeWatermark.js";
 import { removeEditabilityFromSite } from "../utils/removeEditabilityFromSite.js";
 import { updateLoadingState } from "./websocket.js";
+import { createPublicFile } from "./createPublicFile.js";
 
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function createPublicFile(drive, fileMetadata, media) {
-  try {
-    if (oauth2Client.isTokenExpiring()) {
-      console.log("🔄 Renovando token...");
-      await oauth2Client.refreshAccessToken();
-    }
+// async function createPublicFile(drive, fileMetadata, media) {
+//   // try {
+//     if (oauth2Client.isTokenExpiring()) {
+//       console.log("🔄 Renovando token...");
+//       await oauth2Client.refreshAccessToken();
+//     }
 
-    const fileResponse = await drive.files.create({
-      requestBody: fileMetadata,
-      media: media,
-      fields: "id, webViewLink, webContentLink",
-    });
+//     const fileResponse = await drive.files.create({
+//       requestBody: fileMetadata,
+//       media: media,
+//       fields: "id, webViewLink, webContentLink",
+//     });
 
-    await sleep(1000);
+//     console.log(fileResponse)
 
-    await drive.permissions.create({
-      fileId: fileResponse.data.id,
-      requestBody: {
-        role: "reader",
-        type: "anyone",
-      },
-    });
+//     await sleep(1000);
 
-    console.log(`✅ Arquivo ${fileMetadata.name} enviado e tornado público.`);
-    return fileResponse;
-  } catch (error) {
-    console.error(`❌ Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
-    throw new Error(`Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
-  }
-}
+//     await drive.permissions.create({
+//       fileId: fileResponse.data.id,
+//       requestBody: {
+//         role: "reader",
+//         type: "anyone",
+//       },
+//     });
+
+//     console.log(`✅ Arquivo ${fileMetadata.name} enviado e tornado público.`);
+//     return fileResponse;
+//   // } catch (error) {
+//   //   console.error(`❌ Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
+//   //   throw new Error(`Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
+//   // }
+// }
 
 
 async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 5) {
@@ -70,7 +73,7 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
       parents: [driveParentId],
     };
 
-    try {
+    // try {
       if (oauth2Client.isTokenExpiring()) {
         console.log("🔄 Renovando token antes de criar a pasta...");
         await oauth2Client.refreshAccessToken();
@@ -81,18 +84,20 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
         fields: "id",
       });
 
+      console.log('Folder Response' + folderResponse)
+
       folderIds[folder.name] = folderResponse.data.id;
       await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
-    } catch (error) {
-      console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
-      throw new Error(`Erro ao criar pasta ${folder.name}: ${error.message}`);
-    }
+    // } catch (error) {
+    //   console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
+    //   throw new Error(`Erro ao criar pasta ${folder.name}: ${error.message}`);
+    // }
   }
 
   for (let i = 0; i < files.length; i += batchSize) {
     const batch = files.slice(i, i + batchSize);
 
-    try {
+    // try {
       await Promise.all(
         batch.map(async (file) => {
           const fileMetadata = {
@@ -109,10 +114,10 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
       );
 
       console.log(`✅ Lote de ${batch.length} arquivos enviado.`);
-    } catch (error) {
-      console.error(`❌ Erro no upload do lote de arquivos: ${error.message}`);
-      throw new Error(`Erro no upload do lote de arquivos: ${error.message}`);
-    }
+    // } catch (error) {
+    //   console.error(`❌ Erro no upload do lote de arquivos: ${error.message}`);
+    //   throw new Error(`Erro no upload do lote de arquivos: ${error.message}`);
+    // }
   }
 }
 
@@ -133,7 +138,7 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
   await removeWatermark(websiteDirectory);
   await removeEditabilityFromSite(websiteDirectory);
 
-  try {
+  // try {
     const folderMetadata = {
       name: `www.copyei-${websiteDomain}`,
       mimeType: "application/vnd.google-apps.folder",
@@ -172,8 +177,8 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
 
     console.log(`✅ Upload de ${websiteDomain} concluído com sucesso.`);
     return "Upload concluído com sucesso";
-  } catch (error) {
-    console.error(`❌ Erro ao fazer upload do site no Google Drive: ${error.message}`);
-    throw new Error(`Erro ao fazer upload do site no Google Drive: ${error.message}`);
-  }
+  // } catch (error) {
+  //   console.error(`❌ Erro ao fazer upload do site no Google Drive: ${error.message}`);
+  //   throw new Error(`Erro ao fazer upload do site no Google Drive: ${error.message}`);
+  // }
 }
