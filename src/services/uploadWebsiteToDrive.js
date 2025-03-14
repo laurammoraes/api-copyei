@@ -203,6 +203,6 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
       `Erro ao fazer upload do site no Google Drive: ${error.message}`
     );
 
-    return "Erro ao realizar upload"
+    throw new Error("Não foi possível realizar upload");
   }
 }
