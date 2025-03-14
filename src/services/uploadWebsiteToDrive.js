@@ -42,11 +42,6 @@ async function createPublicFile(drive, fileMetadata, media) {
     console.log(`✅ Arquivo ${fileMetadata.name} enviado e tornado público.`);
   } catch (error) {
     console.error(`❌ Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
-
-    return {
-      status: 500,
-      message: 'Erro ao realizar upload de arquivo'
-    }
   }
 }
 
@@ -88,11 +83,6 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
       folderIds[folder.name] = folderResponse.data.id;
       await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
     } catch (error) {
-
-      return {
-        status: 500,
-        message: 'Erro ao criar a pasta'
-      }
       console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
     }
   }
@@ -111,11 +101,7 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
           body: createReadStream(file.path),
         };
 
-        const uploadFile = await createPublicFile(drive, fileMetadata, media);
-
-        if (uploadFile.status === 500) {
-          throw new Error('Erro');
-        }
+        await createPublicFile(drive, fileMetadata, media);
       })
     );
 
