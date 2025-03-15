@@ -24,7 +24,7 @@ uploadToDriveQueue.on("failed", (job, err) => {
   
   console.error(`Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}`);
 
-  jobErrors.set(job.id, err);
+  
 });
 
 uploadToDriveQueue.process(5, async (job) => {

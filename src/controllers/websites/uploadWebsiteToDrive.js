@@ -75,10 +75,6 @@ export async function uploadWebsiteToDrive(req, res) {
     /* Enviar para fila de clonagem */
     await uploadToDrive(websiteDomain, decoded);
 
-    
-
-    
-
     return res.json({ message: "OK" });
   } catch (error) {
     console.error(error);

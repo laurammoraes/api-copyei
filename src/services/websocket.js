@@ -25,3 +25,9 @@ export async function updateLoadingState(website) {
     io.to(`uploading-${website}`).emit("update-loading-state", website);
   }
 }
+
+export async function emitUploadError(website, errorMessage) {
+  if (io) {
+    io.to(`uploading-${website}`).emit("upload-error", { website, error: errorMessage });
+  }
+}

@@ -42,7 +42,7 @@ async function createPublicFile(drive, fileMetadata, media) {
     return fileResponse;
   } catch (error) {
     console.error(`❌ Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
-
+    await emitUploadError(websiteDomain, error.message);
     throw new Error(`Erro ao criar o arquivo ${fileMetadata.name}: ${error.message}`);
 
   }
@@ -89,6 +89,7 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
       await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);
     } catch (error) {
       console.error(`❌ Erro ao criar pasta ${folder.name}: ${error.message}`);
+      await emitUploadError(websiteDomain, error.message);
       throw new Error(`Erro ao criar pasta ${folder.name}: ${error.message}`);
     }
   }
@@ -116,6 +117,7 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
       console.log(`✅ Lote de ${batch.length} arquivos enviado.`);
     } catch (error) {
       console.error(`❌ Erro no upload do lote de arquivos: ${error.message}`);
+      await emitUploadError(websiteDomain, error.message);
       throw new Error(`Erro no upload do lote de arquivos: ${error.message}`);
     }
 
@@ -181,6 +183,7 @@ export async function uploadWebsiteToDrive(websiteDomain, decodedJWT) {
   } catch (error) {
 
     console.error(`❌ Erro ao fazer upload do site no Google Drive: ${error.message}`);
+    await emitUploadError(websiteDomain, error.message);
     throw new Error(`Erro ao fazer upload do site no Google Drive: ${error.message}`);
 
   }
