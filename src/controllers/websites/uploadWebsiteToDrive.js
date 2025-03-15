@@ -77,8 +77,7 @@ export async function uploadWebsiteToDrive(req, res) {
 
     
 
-    console.log('-----------------')
-    console.log(job)
+    
 
     return res.json({ message: "OK" });
   } catch (error) {
