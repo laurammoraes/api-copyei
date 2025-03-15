@@ -48,7 +48,6 @@ async function createPublicFile(drive, fileMetadata, media) {
   }
 }
 
-
 async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 5) {
   const entries = await fs.readdir(localPath, { withFileTypes: true });
 
@@ -82,6 +81,9 @@ async function uploadFolderToDrive(drive, localPath, driveParentId, batchSize = 
         requestBody: folderMetadata,
         fields: "id",
       });
+
+      console.log('Folder Response' )
+      console.dir()
 
       folderIds[folder.name] = folderResponse.data.id;
       await uploadFolderToDrive(drive, folder.path, folderResponse.data.id, batchSize);

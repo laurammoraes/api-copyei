@@ -73,10 +73,12 @@ export async function uploadWebsiteToDrive(req, res) {
     });
 
     /* Enviar para fila de clonagem */
-    const teste = await uploadToDrive(websiteDomain, decoded);
+    const job = await uploadToDrive(websiteDomain, decoded);
+
+    await job.finished()
 
     console.log('-----------------')
-    console.log(teste)
+    console.log(job)
 
     return res.json({ message: "OK" });
   } catch (error) {
