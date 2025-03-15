@@ -28,6 +28,6 @@ export async function updateLoadingState(website) {
 
 export async function emitUploadError(website, errorMessage) {
   if (io) {
-    io.to(`uploading-${website}`).emit("upload-error", { website, error: errorMessage });
+    io.to(`uploading-${website}`).emit("upload-error", { website, error: 'Não foi possível realizar o upload dessa página, tente outra' });
   }
 }
