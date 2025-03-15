@@ -40,6 +40,13 @@ export async function uploadToDrive(websiteDomain, decodedJWT) {
   if (!websiteDomain || !decodedJWT) {
     throw new Error("Parâmetros inválidos: websiteDomain e decodedJWT são obrigatórios");
   }
-  await uploadToDriveQueue.add({ websiteDomain, decodedJWT });
+  const job = await uploadToDriveQueue.add({ websiteDomain, decodedJWT });
+
+  try {
+    await uploadToDriveQueue.waitUntilFinished(worker, job.id); // Aguarda a finalização
+    return { message: "Upload concluído com sucesso" };
+  } catch (error) {
+    throw new Error(`Erro no upload para o Google Drive: ${error.message}`);
+  }
 }
 
