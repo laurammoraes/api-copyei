@@ -117,8 +117,6 @@ export async function domainsHandler(req, res, next) {
         console.error(error);
       }
 
-      return error
-
       console.log("Erro ao rederizar a página", error)
       return res.redirect(process.env.APP_BASE_URL);
     }
