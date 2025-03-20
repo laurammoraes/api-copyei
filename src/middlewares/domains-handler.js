@@ -92,7 +92,9 @@ export async function domainsHandler(req, res, next) {
       if (process.env.NODE_ENV === "development") {
         console.error("Erro inesperado:", error);
       }
+
       return res.status(500).render("errorPage", { message: "Erro interno do servidor." });
+
     }
   }
   return next();
