@@ -116,6 +116,8 @@ export async function domainsHandler(req, res, next) {
       if (process.env.NODE_ENV === "development") {
         console.error(error);
       }
+
+      console.log("Erro ao rederizar a página", error)
       return res.redirect(process.env.APP_BASE_URL);
     }
   }
