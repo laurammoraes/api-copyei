@@ -91,7 +91,9 @@ export async function domainsHandler(req, res, next) {
         });
         mimeType = metadata.data.mimeType || mimeType;
       } catch (error) {
+        console.log(error)
         if (error.response && error.response.status === 404) {
+          
           throw new Error("Arquivo não encontrado no Google Drive.");
         } else {
           throw new Error("Erro ao obter metadados do arquivo: " + error.message);
@@ -117,7 +119,7 @@ export async function domainsHandler(req, res, next) {
         console.error(error);
       }
 
-      return error
+    
 
       console.log("Erro ao rederizar a página", error)
       return res.redirect(process.env.APP_BASE_URL);
