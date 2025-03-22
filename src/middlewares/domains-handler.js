@@ -105,11 +105,14 @@ export async function domainsHandler(req, res, next) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Erro ao renderizar a página:', error)
       }
-    
+
+      console.log(error)
       /* Captura a mensagem do erro de forma segura */
-      const errorMessage = encodeURIComponent(error instanceof Error ? error.message : 'Erro desconhecido')
+      const errorMessage = encodeURIComponent(error instanceof Error ? error.message: 'Erro desconhecido')
+
+
     
-      return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`)
+      return res.redirect(`https://app.copyei.com/error?message=${errorMessage.}`)
     }
 
   }
