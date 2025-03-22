@@ -30,7 +30,7 @@ async function getFileIdByPath(drive, folderId, pathSegments) {
 export async function domainsHandler(req, res, next) {
   /* Verificar se o cabeçalho 'host' existe */
   const host = req.headers.host ? req.headers.host.split(":")[0] : null;
-  if (!host) return res.redirect('/error?message=Host não encontrado');
+  if (!host) return res.redirect('https://app.copyei.com/error?message=Host não encontrado');
 
   /* Ignore API endpoints */
   if (host === "api.copyei.com") return next();
@@ -66,7 +66,7 @@ export async function domainsHandler(req, res, next) {
         !userGoogleCredentials.access_token ||
         !userGoogleCredentials.refresh_token
       ) {
-        return res.redirect('/error.html?message=Credenciais inválidas ou ausentes para o usuário.');
+        return res.redirect('https://app.copyei.com/error?message=Credenciais inválidas ou ausentes para o usuário.');
         
       }
 
@@ -109,7 +109,7 @@ export async function domainsHandler(req, res, next) {
       /* Captura a mensagem do erro de forma segura */
       const errorMessage = encodeURIComponent(error instanceof Error ? error.message : 'Erro desconhecido')
     
-      return res.redirect(`/error?message=${errorMessage}`)
+      return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`)
     }
 
   }
