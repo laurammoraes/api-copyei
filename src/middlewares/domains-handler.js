@@ -30,7 +30,7 @@ async function getFileIdByPath(drive, folderId, pathSegments) {
 export async function domainsHandler(req, res, next) {
   /* Verificar se o cabeçalho 'host' existe */
   const host = req.headers.host ? req.headers.host.split(":")[0] : null;
-  if (!host) return res.redirect(process.env.APP_BASE_URL);
+  if (!host) return res.redirect('/error?message=Host não encontrado');
 
   /* Ignore API endpoints */
   if (host === "api.copyei.com") return next();
@@ -40,7 +40,7 @@ export async function domainsHandler(req, res, next) {
     const requestPath = req.path === "/" ? "index.html" : req.path.substring(1);
     const pathSegments = requestPath.split("/");
 
-    try {
+    // try {
       const websiteTitle = host.split(".")[0];
       if (!websiteTitle) return res.redirect(process.env.APP_BASE_URL);
 
@@ -66,7 +66,8 @@ export async function domainsHandler(req, res, next) {
         !userGoogleCredentials.access_token ||
         !userGoogleCredentials.refresh_token
       ) {
-        throw new Error("Credenciais inválidas ou ausentes para o usuário.");
+        return res.redirect('/error.html?message=Credenciais inválidas ou ausentes para o usuário.');
+        
       }
 
       /* Obter instância do Google Drive */
@@ -90,18 +91,7 @@ export async function domainsHandler(req, res, next) {
           fields: "name, mimeType",
         });
         mimeType = metadata.data.mimeType || mimeType;
-      } catch (error) {
-        console.log(error)
-        if (error.response && error.response.status === 404) {
-          
-          throw new Error("Arquivo não encontrado no Google Drive.");
-        } else {
-          throw new Error("Erro ao obter metadados do arquivo: " + error.message);
-        }
-      }
-
-      /* Retornar conteúdo do arquivo para o cliente */
-      try {
+      
         const fileStream = await drive.files.get(
           { fileId, alt: "media" },
           { responseType: "stream" }
@@ -109,21 +99,21 @@ export async function domainsHandler(req, res, next) {
 
         res.setHeader("Content-Type", mimeType);
         return fileStream.data.pipe(res);
-      } catch (error) {
-        throw new Error("Erro ao obter conteúdo do arquivo: " + error.message);
-      }
-
+      
     } catch (error) {
       /* Logar erro apenas em ambiente de desenvolvimento */
-      if (process.env.NODE_ENV === "development") {
-        console.error(error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao renderizar a página:', error)
       }
-
-
-      console.log("Erro ao rederizar a página", error)
-      return res.redirect(process.env.APP_BASE_URL);
+    
+      /* Captura a mensagem do erro de forma segura */
+      const errorMessage = encodeURIComponent(error instanceof Error ? error.message : 'Erro desconhecido')
+    
+      return res.redirect(`/error?message=${errorMessage}`)
     }
+
   }
 
   return next();
+
 }
