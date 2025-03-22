@@ -134,7 +134,7 @@ export async function domainsHandler(req, res, next) {
           }
       }
      
-      await aaPanelWebsitesDelete(req, res);
+      
       return res.redirect(`https://app.copyei.com/error?message=${encodeURIComponent(errorMessage)}`);
       
 
