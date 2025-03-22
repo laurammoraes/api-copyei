@@ -126,6 +126,7 @@ export async function domainsHandler(req, res, next) {
     
       return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`)
     }
+  }
 
   }
 
