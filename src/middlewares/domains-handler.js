@@ -5,7 +5,7 @@ import { google } from "googleapis";
 import { oauth2Client } from "../lib/google-oauth.js";
 import { prisma } from "../lib/prisma.js";
 import { getValidAccessToken } from "../utils/getGoogleAccessToken.js";
-import { aaPanelWebsitesDelete } from "../controllers/aapanel/websites-delete.js";
+
 
 /* Obter arquivo do drive pelo path */
 async function getFileIdByPath(drive, folderId, pathSegments) {
