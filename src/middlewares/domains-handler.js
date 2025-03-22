@@ -91,14 +91,14 @@ export async function domainsHandler(req, res, next) {
       /* Obter tipo do arquivo */
       let mimeType = "application/octet-stream";
       try {
-        // const metadata = await drive.files.get({
-        //   fileId,
-        //   fields: "name, mimeType",
-        // });
         const metadata = await drive.files.get({
           fileId,
-          fields: "id, name, mimeType", 
+          fields: "name, mimeType",
         });
+        // const metadata = await drive.files.get({
+        //   fileId,
+        //   fields: "id, name, mimeType", 
+        // });
         mimeType = metadata.data.mimeType || mimeType;
       
         const fileStream = await drive.files.get(
