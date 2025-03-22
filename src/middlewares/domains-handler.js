@@ -120,9 +120,7 @@ export async function domainsHandler(req, res, next) {
       if (error.response && error.response.data && error.response.data.error) {
         const googleError = error.response.data.error;
         console.log(googleError, "entrou")
-        errorCode = googleError.code || 500;
-        errorMessage = googleError.message || "Erro desconhecido";
-    
+        
         
         if (googleError.code === 403 || googleError.code === 400 ) {
           errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
