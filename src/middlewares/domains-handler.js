@@ -124,8 +124,10 @@ export async function domainsHandler(req, res, next) {
           errorMessage = "Credenciais inválidas. Faça login novamente.";
         }
     
-      return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`)
+      
     }
+
+    return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`)
   }
 
   }
