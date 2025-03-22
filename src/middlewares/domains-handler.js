@@ -112,8 +112,10 @@ export async function domainsHandler(req, res, next) {
         console.error('Erro ao renderizar a página:', error);
       }
     
-      let errorMessage 
+      let errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado."
       const googleError = error.response.data.error;
+
+      console.log()
 
       
         switch (googleError.code) {
