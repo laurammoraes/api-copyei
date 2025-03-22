@@ -113,27 +113,31 @@ export async function domainsHandler(req, res, next) {
       }
     
       let errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado."
-      const googleError = error.response.data.error;
 
-      console.log()
+      if(error.response.data.error){
+        const googleError = error.response.data.error;
 
-      
-        switch (googleError.code) {
-          case 403:
-            errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
-            break;
-          case 400:
-            errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
-            break;
-          case 404:
-            errorMessage = "O arquivo solicitado não foi encontrado.";
-            break;
-          case 401:
-            errorMessage = "Credenciais inválidas. Faça login novamente.";
-            break;
-        }
+        console.log()
   
-        return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`);
+        
+          switch (googleError.code) {
+            case 403:
+              errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
+              break;
+            case 400:
+              errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
+              break;
+            case 404:
+              errorMessage = "O arquivo solicitado não foi encontrado.";
+              break;
+            case 401:
+              errorMessage = "Credenciais inválidas. Faça login novamente.";
+              break;
+          }
+      }
+     
+  
+      return res.redirect(`https://app.copyei.com/error?message=${encodeURIComponent(errorMessage)}`);
       
 
       
