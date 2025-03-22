@@ -119,6 +119,7 @@ export async function domainsHandler(req, res, next) {
 
       if (error.response && error.response.data && error.response.data.error) {
         const googleError = error.response.data.error;
+        console.log(googleError, "entrou")
         errorCode = googleError.code || 500;
         errorMessage = googleError.message || "Erro desconhecido";
     
