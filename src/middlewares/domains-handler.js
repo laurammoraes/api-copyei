@@ -11,9 +11,14 @@ async function getFileIdByPath(drive, folderId, pathSegments) {
   let currentFolderId = folderId;
 
   for (const segment of pathSegments) {
+    // const response = await drive.files.list({
+    //   q: `'${currentFolderId}' in parents and name = '${segment}' and trashed = false`,
+    //   fields: "files(id,name,  mimeType)",
+    // });
+
     const response = await drive.files.list({
-      q: `'${currentFolderId}' in parents and name = '${segment}' and trashed = false`,
-      fields: "files(id, mimeType)",
+      q: `'${folderId}' in parents and name='${fileName}'`,
+      fields: "files(id, name, mimeType)", 
     });
 
     const files = response.data.files;
@@ -86,9 +91,13 @@ export async function domainsHandler(req, res, next) {
       /* Obter tipo do arquivo */
       let mimeType = "application/octet-stream";
       try {
+        // const metadata = await drive.files.get({
+        //   fileId,
+        //   fields: "name, mimeType",
+        // });
         const metadata = await drive.files.get({
           fileId,
-          fields: "name, mimeType",
+          fields: "id, name, mimeType", 
         });
         mimeType = metadata.data.mimeType || mimeType;
       
