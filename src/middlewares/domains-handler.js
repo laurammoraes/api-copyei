@@ -11,15 +11,12 @@ async function getFileIdByPath(drive, folderId, pathSegments) {
   let currentFolderId = folderId;
 
   for (const segment of pathSegments) {
-    // const response = await drive.files.list({
-    //   q: `'${currentFolderId}' in parents and name = '${segment}' and trashed = false`,
-    //   fields: "files(id,name,  mimeType)",
-    // });
-
     const response = await drive.files.list({
-      q: `'${folderId}' in parents and name='${fileName}'`,
-      fields: "files(id, name, mimeType)", 
+      q: `'${currentFolderId}' in parents and name = '${segment}' and trashed = false`,
+      fields: "files(id,name,  mimeType)",
     });
+
+    
 
     const files = response.data.files;
 
