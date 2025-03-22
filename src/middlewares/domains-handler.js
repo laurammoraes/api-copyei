@@ -88,7 +88,7 @@ export async function domainsHandler(req, res, next) {
       try {
         const metadata = await drive.files.get({
           fileId,
-          fields: "name, mimeType",
+          fields: "files(name,mimeType)",
         });
         mimeType = metadata.data.mimeType || mimeType;
       
