@@ -109,7 +109,9 @@ export async function domainsHandler(req, res, next) {
       let errorMessage = "Erro desconhecido";
       let errorCode = 500; 
     
-      console.log(error.response.data.error)
+      console.log(error.response.data, 'Data')
+      console.log(error.response, 'Response')
+
       if (error.response && error.response.data && error.response.data.error) {
         const googleError = error.response.data.error;
         errorCode = googleError.code || 500;
