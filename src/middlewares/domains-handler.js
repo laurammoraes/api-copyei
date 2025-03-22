@@ -5,6 +5,7 @@ import { google } from "googleapis";
 import { oauth2Client } from "../lib/google-oauth.js";
 import { prisma } from "../lib/prisma.js";
 import { getValidAccessToken } from "../utils/getGoogleAccessToken.js";
+import { aaPanelWebsitesDelete } from "../controllers/aapanel/websites-delete.js";
 
 /* Obter arquivo do drive pelo path */
 async function getFileIdByPath(drive, folderId, pathSegments) {
@@ -92,10 +93,7 @@ export async function domainsHandler(req, res, next) {
           fileId,
           fields: "name, mimeType",
         });
-        // const metadata = await drive.files.get({
-        //   fileId,
-        //   fields: "id, name, mimeType", 
-        // });
+       
         mimeType = metadata.data.mimeType || mimeType;
       
         const fileStream = await drive.files.get(
@@ -112,12 +110,12 @@ export async function domainsHandler(req, res, next) {
         console.error('Erro ao renderizar a página:', error);
       }
     
-      let errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado."
+      let errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado. Tente clonar e hospedar no DRIVE novamente."
 
       if(error.response.data.error){
         const googleError = error.response.data.error;
 
-        console.log()
+
   
         
           switch (googleError.code) {
@@ -136,7 +134,7 @@ export async function domainsHandler(req, res, next) {
           }
       }
      
-  
+      await aaPanelWebsitesDelete()
       return res.redirect(`https://app.copyei.com/error?message=${encodeURIComponent(errorMessage)}`);
       
 
