@@ -112,34 +112,31 @@ export async function domainsHandler(req, res, next) {
         console.error('Erro ao renderizar a página:', error);
       }
     
-      let errorMessage = "Erro desconhecido"; // Mensagem padrão
+      let errorMessage 
+      const googleError = error.response.data.error;
+
+      return setTimeout(() => {
+        switch (googleError.code) {
+          case 403:
+            errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
+            break;
+          case 400:
+            errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
+            break;
+          case 404:
+            errorMessage = "O arquivo solicitado não foi encontrado.";
+            break;
+          case 401:
+            errorMessage = "Credenciais inválidas. Faça login novamente.";
+            break;
+        }
+  
+        return res.redirect(`https://app.copyei.com/error?message=${encodeURIComponent(errorMessage)}`);
+      }, 2000); // Aguarda 2 segundos antes de processar a mensagem de erro
+
+      
     
-      if (error.response?.data?.error) {
-        const googleError = error.response.data.error;
-        console.log(googleError, "entrou");
-    
-        // Aguardar um tempo antes de processar a mensagem de erro
-        return setTimeout(() => {
-          switch (googleError.code) {
-            case 403:
-              errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
-              break;
-            case 400:
-              errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
-              break;
-            case 404:
-              errorMessage = "O arquivo solicitado não foi encontrado.";
-              break;
-            case 401:
-              errorMessage = "Credenciais inválidas. Faça login novamente.";
-              break;
-          }
-    
-          return res.redirect(`https://app.copyei.com/error?message=${encodeURIComponent(errorMessage)}`);
-        }, 2000); // Aguarda 2 segundos antes de processar a mensagem de erro
-      }
-    
-      return res.redirect(`https://app.copyei.com/error?message=${encodeURIComponent(errorMessage)}`);
+     
     }    
 
   }
