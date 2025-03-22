@@ -88,7 +88,7 @@ export async function domainsHandler(req, res, next) {
       try {
         const metadata = await drive.files.get({
           fileId,
-          fields: "files(name,mimeType)",
+          fields: "name, mimeType",
         });
         mimeType = metadata.data.mimeType || mimeType;
       
@@ -109,8 +109,7 @@ export async function domainsHandler(req, res, next) {
       let errorMessage = "Erro desconhecido";
       let errorCode = 500; 
     
-      console.log(error.response.data, 'Data')
-      console.log(error.response, 'Response')
+      
 
       if (error.response && error.response.data && error.response.data.error) {
         const googleError = error.response.data.error;
