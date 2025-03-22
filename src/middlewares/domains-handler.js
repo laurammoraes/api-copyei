@@ -123,7 +123,7 @@ export async function domainsHandler(req, res, next) {
         errorMessage = googleError.message || "Erro desconhecido";
     
         
-        if (googleError.code === 403) {
+        if (googleError.code === 403 || googleError.code === 400 ) {
           errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
         } else if (googleError.code === 404) {
           errorMessage = "O arquivo solicitado não foi encontrado.";
