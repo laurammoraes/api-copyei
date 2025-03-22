@@ -106,11 +106,23 @@ export async function domainsHandler(req, res, next) {
         console.error('Erro ao renderizar a página:', error)
       }
 
-      console.log(error)
-      /* Captura a mensagem do erro de forma segura */
-      const errorMessage = encodeURIComponent(error instanceof Error ? error.message: 'Erro desconhecido')
-
-
+      let errorMessage = "Erro desconhecido";
+      let errorCode = 500; 
+    
+      
+      if (error.response && error.response.data && error.response.data.error) {
+        const googleError = error.response.data.error;
+        errorCode = googleError.code || 500;
+        errorMessage = googleError.message || "Erro desconhecido";
+    
+        
+        if (googleError.code === 403) {
+          errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
+        } else if (googleError.code === 404) {
+          errorMessage = "O arquivo solicitado não foi encontrado.";
+        } else if (googleError.code === 401) {
+          errorMessage = "Credenciais inválidas. Faça login novamente.";
+        }
     
       return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`)
     }
