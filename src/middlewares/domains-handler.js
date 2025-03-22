@@ -115,7 +115,7 @@ export async function domainsHandler(req, res, next) {
       let errorMessage 
       const googleError = error.response.data.error;
 
-      return setTimeout(() => {
+      
         switch (googleError.code) {
           case 403:
             errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
@@ -131,8 +131,8 @@ export async function domainsHandler(req, res, next) {
             break;
         }
   
-        return res.redirect(`https://app.copyei.com/error?message=${encodeURIComponent(errorMessage)}`);
-      }, 2000); // Aguarda 2 segundos antes de processar a mensagem de erro
+        return res.redirect(`https://app.copyei.com/error?message=${errorMessage}`);
+      
 
       
     
