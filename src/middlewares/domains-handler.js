@@ -122,11 +122,17 @@ export async function domainsHandler(req, res, next) {
         console.log(googleError, "entrou")
         
         
-        if (googleError.code === 403 || googleError.code === 400 ) {
+        if (googleError.code === 403 ) {
           errorMessage = "O arquivo foi identificado como malware ou spam pelo GOOGLE DRIVE e não pode ser baixado.";
-        } else if (googleError.code === 404) {
+        }
+        if (googleError.code === 400) {
           errorMessage = "O arquivo solicitado não foi encontrado.";
-        } else if (googleError.code === 401) {
+        }
+         if (googleError.code === 404) {
+          errorMessage = "O arquivo solicitado não foi encontrado.";
+        } 
+        
+        if (googleError.code === 401) {
           errorMessage = "Credenciais inválidas. Faça login novamente.";
         }
     
