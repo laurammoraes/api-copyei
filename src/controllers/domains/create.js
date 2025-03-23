@@ -42,14 +42,7 @@ export async function createDomain(req, res) {
 
     return res.status(200).json({ message: "Domínio criado com sucesso" });
   } catch (error) {
-    /* Captação de erros do Zod */
-    // if (error instanceof ZodError) {
-    //   return res.status(400).json({
-    //     message: "Data Parse Error",
-    //     errors: error.flatten().fieldErrors,
-    //   });
-    // }
-
+   
     console.error(error);
     return res.status(500).json({ message: "Erro ao cadastrar domínio" });
   }
