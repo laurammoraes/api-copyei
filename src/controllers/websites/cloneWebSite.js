@@ -89,6 +89,8 @@ export async function cloneWebSite(req, res) {
 
     return res.status(200).json({ message: "OK" });
   } catch (error) {
+
+    console.error(error);
     /* Captação de erros do Zod */
     if (error instanceof ZodError) {
       return res.status(400).json({
@@ -97,7 +99,7 @@ export async function cloneWebSite(req, res) {
       });
     }
 
-    console.error(error);
+    
     return res.status(500).json({
       error:
         "Ocorreu um erro ao clonar o site informado.",

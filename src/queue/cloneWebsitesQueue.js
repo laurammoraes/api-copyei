@@ -42,6 +42,7 @@ export async function sendUrlToQueue(siteId, url, domain, title) {
   try {
     await cloneWebsitesQueue.add({ siteId, url, domain, title });
   } catch (error) {
+    console.error(error, "Erro na FILA DE CLONAGEM");
     console.error('Erro ao adicionar job à fila: ${error.message}');
   }
 }
