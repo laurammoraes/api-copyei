@@ -16,8 +16,8 @@ export const removeWatermark = async (siteDirectory) => {
 
       /* Verificar se a marca da água existe */
       if (data.includes("data-watermark")) {
-        const newContent = data.replace(watermarkStyle, "");
-        await fs.writeFile(filePath, newContent, "utf-8");
+        // const newContent = data.replace(watermarkStyle, "");
+        // await fs.writeFile(filePath, newContent, "utf-8");
       }
     }
   } catch (err) {
