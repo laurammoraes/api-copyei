@@ -47,6 +47,7 @@ export async function provideStaticSite(req, res, next) {
     const isEditor = req.path.includes("/editor/");
     if (!isEditor) {
       // await addWatermark(siteDirectory);
+      await removeWatermark(siteDirectory);
     } else {
       await removeWatermark(siteDirectory);
     }
