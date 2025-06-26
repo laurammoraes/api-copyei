@@ -45,11 +45,11 @@ export async function provideStaticSite(req, res, next) {
 
     /* Adicionar ou remover marca da água */
     const isEditor = req.path.includes("/editor/");
-    if (!isEditor) {
-      await addWatermark(siteDirectory);
-    } else {
-      await removeWatermark(siteDirectory);
-    }
+    // if (!isEditor) {
+    //   await addWatermark(siteDirectory);
+    // } else {
+    //   await removeWatermark(siteDirectory);
+    // }
 
     /* Prover site estático */
     const serveStatic = express.static(siteDirectory);
