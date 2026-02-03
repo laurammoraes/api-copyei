@@ -46,9 +46,6 @@ export async function findWebSite(req, res) {
           {
             domain: "copyei.com", // domínio padrão
           },
-          {
-            domain: "copyei.online", // domínio padrão
-          },
         ],
       },
       select: {
