@@ -33,7 +33,7 @@ async function getFileIdByPath(drive, folderId, pathSegments) {
 export async function domainsHandler(req, res, next) {
   /* Verificar se o cabeçalho 'host' existe */
   const host = req.headers.host ? req.headers.host.split(":")[0] : null;
-  if (!host) return res.redirect('https://app.copyei.com/error?message=Host não encontrado');
+  if (!host) return res.redirect('https://app.copyei.online/error?message=Host não encontrado');
 
   /* Ignore API endpoints */
   if (host === "api.copyei.online") return next();
