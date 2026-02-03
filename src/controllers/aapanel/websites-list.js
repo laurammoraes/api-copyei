@@ -7,6 +7,7 @@ export async function aaPanelWebsitesList(req, res) {
   try {
     /* Validar usuário */
     const user = req.user;
+    console.log(user + " - websites-list");
     if (!user) return res.status(401).json({ message: "Não autorizado" });
 
     /* aaPanel Ação */

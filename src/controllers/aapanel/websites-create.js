@@ -13,6 +13,7 @@ export async function aaPanelWebsitesCreate(req, res) {
   try {
     /* Validar usuário */
     const user = req.user;
+    console.log(user);
     if (!user) return res.status(401).json({ message: "Não autorizado" });
 
     /* Validar o corpo da requisição */
