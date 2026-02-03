@@ -44,23 +44,18 @@ export async function loginUser(req, res) {
       }
     );
 
-    /* Retornar cookie no response header */
-    // res.cookie("copyei_user", token, {
-    //   path: "/",
-    //   expiresIn: "7d", // 7 dias
-    // });
+    /* Cookie (backup para requisições no mesmo domínio) */
+    res.cookie("copyei_user", token, {
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      domain: process.env.COOKIE_DOMAIN || ".copyei.online",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      httpOnly: true,
+    });
 
-        /* Retornar cookie no response header */
-        res.cookie("copyei_user", token, {
-          path: "/",
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias em ms
-          domain: ".copyei.online",  // compartilha entre app e api
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          httpOnly: true,
-        });
-
-    return res.status(200).json({ message: "OK" });
+    /* Retorna o token para o frontend enviar no header Authorization (evita problemas com cookies cross-origin) */
+    return res.status(200).json({ message: "OK", token });
   } catch (error) {
     /* Captação de erros do Zod */
     if (error instanceof ZodError) {
