@@ -45,10 +45,20 @@ export async function loginUser(req, res) {
     );
 
     /* Retornar cookie no response header */
-    res.cookie("copyei_user", token, {
-      path: "/",
-      expiresIn: "7d", // 7 dias
-    });
+    // res.cookie("copyei_user", token, {
+    //   path: "/",
+    //   expiresIn: "7d", // 7 dias
+    // });
+
+        /* Retornar cookie no response header */
+        res.cookie("copyei_user", token, {
+          path: "/",
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias em ms
+          domain: ".copyei.online",  // compartilha entre app e api
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          httpOnly: true,
+        });
 
     return res.status(200).json({ message: "OK" });
   } catch (error) {
