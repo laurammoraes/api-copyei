@@ -61,7 +61,7 @@ app.use("/api", recoverRouter);
 app.use("/api", googleAuthRouter);
 
 /* Static Routes Provider */
-app.use("/api/site/:siteDomain", isUser, provideStaticSite);
+app.use("/api/site/:siteDomain", /* isUser, */ provideStaticSite);
 app.use("/api/editor/:siteDomain", isUser, provideStaticEditor);
 
 /* Starting WebSocket */

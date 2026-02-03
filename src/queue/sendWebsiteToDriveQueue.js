@@ -10,7 +10,7 @@ const uploadToDriveQueue = new Queue("drive", {
   },
   defaultJobOptions: {
     removeOnComplete: true, 
-    attempts: 3, 
+    // attempts: 3, 
     // timeout: 30000,
     backoff: {
       type: "fixed",
@@ -21,7 +21,10 @@ const uploadToDriveQueue = new Queue("drive", {
 });
 
 uploadToDriveQueue.on("failed", (job, err) => {
+  
   console.error(`Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}`);
+
+  
 });
 
 uploadToDriveQueue.process(5, async (job) => {
@@ -37,6 +40,8 @@ export async function uploadToDrive(websiteDomain, decodedJWT) {
   if (!websiteDomain || !decodedJWT) {
     throw new Error("Parâmetros inválidos: websiteDomain e decodedJWT são obrigatórios");
   }
-  await uploadToDriveQueue.add({ websiteDomain, decodedJWT });
+   await uploadToDriveQueue.add({ websiteDomain, decodedJWT });
+
+  
 }
 

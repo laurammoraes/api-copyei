@@ -1,10 +1,12 @@
 import sendEmail from '../../services/sendEmail.js';
 import { prisma } from "../../lib/prisma.js";
+import bcrypt from "bcrypt";
+import { generatePassword } from '../../services/generatePassword.js';
 
 export async function actionAccount(req, res) {
     try {
-        const email = req.body.Customer.email;
-        const description_plan = req.body.Product.product_name;
+        const email = req.body.comprador.email;
+        const description_plan = req.body.produto.nome;
         const trigger = req.query.trigger;
         const daysUntilActivation = req.query.daysUntilActivation;
         const planType = req.query.plan_type;
@@ -41,6 +43,8 @@ export async function actionAccount(req, res) {
                     }
                 });
             } else {
+
+                const password = generatePassword()
                 const hash = await bcrypt.hash(password, 10);
 
                 user = await prisma.users.create({
