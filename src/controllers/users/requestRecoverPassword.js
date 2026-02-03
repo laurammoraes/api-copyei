@@ -25,7 +25,7 @@ export async function requestRecoverPassword(req, res) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const resetPasswordLink = `https://app.copyei.com/passwordRecovery/${user.id}`;
+        const resetPasswordLink = `https://app.copyei.online/passwordRecovery/${user.id}`;
 
         const subject = 'Recupere sua senha';
         const text = 'Olá! Recupere sua senha pelo link abaixo';

@@ -33,9 +33,9 @@ export async function domainsHandler(req, res, next) {
   if (!host) return res.redirect(process.env.APP_BASE_URL);
 
   /* Ignore API endpoints */
-  if (host === "api.copyei.com") return next();
+  if (host === "api.copyei.online") return next();
 
-  if (host.includes(".zr0.online")) {
+  if (host.includes(".zr0.com.br")) {
     /* Obter caminho relativo, com o index.html sendo o default */
     const requestPath = req.path === "/" ? "index.html" : req.path.substring(1);
     const pathSegments = requestPath.split("/");

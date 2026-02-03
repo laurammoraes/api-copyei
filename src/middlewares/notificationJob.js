@@ -26,7 +26,7 @@ cron.schedule('0 9 * * *', async () => {
                 data: { activation_date: null, updated_at: new Date() }
             });
 
-            const resetPasswordLink = `https://app.copyei.com/passwordRecovery/${user.id}`;
+            const resetPasswordLink = `https://app.copyei.online/passwordRecovery/${user.id}`;
             const subject = 'Sua conta foi ativada! Recupere sua senha COPYEI';
             const text = 'Olá! Recupere sua senha pelo link abaixo';
             const html = `

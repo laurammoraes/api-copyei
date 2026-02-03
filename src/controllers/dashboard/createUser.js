@@ -43,7 +43,7 @@ export async function createUser(req, res) {
             },
         });
 
-        const resetPasswordLink = `https://app.copyei.com/passwordRecovery/${user.id}`;
+        const resetPasswordLink = `https://app.copyei.online/passwordRecovery/${user.id}`;
 
         const subject = 'Recupere sua senha COPYEI';
         const text = 'Olá! Recupere sua senha pelo link abaixo';

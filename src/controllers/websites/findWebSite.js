@@ -44,7 +44,7 @@ export async function findWebSite(req, res) {
             user_id: user.id, // domínios criados pelo usuário
           },
           {
-            domain: "copyei.com", // domínio padrão
+            domain: "copyei.online", // domínio padrão
           },
         ],
       },
