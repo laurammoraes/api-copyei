@@ -21,7 +21,7 @@ async function seed() {
   await prisma.domains.create({
     data: {
       user_id: user.id,
-      domain: "copyei.online",
+      domain: "copyei.com",
     },
   });
 
