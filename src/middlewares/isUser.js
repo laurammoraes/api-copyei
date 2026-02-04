@@ -7,8 +7,19 @@ export async function isUser(req, res, next) {
       ? `Bearer ${req.cookies.copyei_user}`
       : null;
 
-    /* Obter authorization header */
-    const authorization = req.headers["authorization"] || directCookie;
+    /* Obter authorization - ignorar header se token for inválido */
+    let authorization = req.headers["authorization"] || directCookie;
+
+    /* Se o header contém "Bearer undefined" ou similar, usar o cookie como fallback */
+    if (authorization) {
+      const parts = authorization.split(" ");
+      const tokenValue = parts[1];
+      const invalidTokens = ["undefined", "null", ""];
+      if (invalidTokens.includes(tokenValue) || !tokenValue) {
+        authorization = directCookie;
+      }
+    }
+
     if (!authorization)
       return res.status(401).json({ message: "Not Authorized" });
 
