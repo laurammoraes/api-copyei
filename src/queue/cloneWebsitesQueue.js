@@ -6,7 +6,7 @@ const cloneWebsitesQueue = new Queue("clone", {
   redis: {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD,
+    ...(process.env.REDIS_PASSWORD && { password: process.env.REDIS_PASSWORD }),
   },
   defaultJobOptions: {
     removeOnComplete: true,

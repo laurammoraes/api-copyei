@@ -11,7 +11,7 @@ export const envSchema = z.object({
   DATABASE_URL: z.string(),
   REDIS_HOST: z.string(),
   REDIS_PORT: z.string(),
-  REDIS_PASSWORD: z.string(),
+  REDIS_PASSWORD: z.string().optional().default(""),
 
   /* SECRETS */
   COPYEI_WEBSITES_OUTPUT_DIRECTORY: z.string(),
