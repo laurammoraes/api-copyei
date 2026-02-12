@@ -18,11 +18,11 @@ async function seed() {
     },
   });
 
-  await prisma.domains.create({
-    data: {
-      user_id: user.id,
-      domain: "copyei.com",
-    },
+  await prisma.domains.createMany({
+    data: [
+      { user_id: user.id, domain: "copyei.com" },
+      { user_id: user.id, domain: "copyei.online" },
+    ],
   });
 
   await prisma.$disconnect();

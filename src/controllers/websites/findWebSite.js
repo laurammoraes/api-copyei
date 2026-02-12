@@ -37,15 +37,15 @@ export async function findWebSite(req, res) {
       },
     });
 
-    /* Obter domínios criados pelo usuário, mais o domínio padrão (copyei.com) */
+    /* Obter domínios criados pelo usuário, mais o domínio padrão (copyei.online). copyei.com não é mais oferecido para novos clones. */
     const domains = await prisma.domains.findMany({
       where: {
         OR: [
           {
             user_id: user.id, // domínios criados pelo usuário
-          }, 
+          },
           {
-            domain: "copyei.com", // domínio padrão
+            domain: "copyei.online", // domínio padrão da plataforma
           },
         ],
       },
