@@ -20,7 +20,7 @@ const cloneWebsitesQueue = new Queue("clone", {
 });
 
 cloneWebsitesQueue.on("failed", (job, err) => {
-  console.error('Job ${ job.id } falhou após ${job.attemptsMade} tentativas: ${err.message}');
+  console.error(`Job ${job.id} falhou após ${job.attemptsMade} tentativas: ${err.message}`);
 });
 
 
@@ -33,7 +33,7 @@ cloneWebsitesQueue.process(async (job) => {
       job.data.title
     );
   } catch (error) {
-    console.error('Erro ao processar job: ${error.message}');
+    console.error(`Erro ao processar job: ${error.message}`);
     throw error;
   }
 });
@@ -43,7 +43,7 @@ export async function sendUrlToQueue(siteId, url, domain, title) {
     await cloneWebsitesQueue.add({ siteId, url, domain, title });
   } catch (error) {
     console.error(error, "Erro na FILA DE CLONAGEM");
-    console.error('Erro ao adicionar job à fila: ${error.message}');
+    console.error(`Erro ao adicionar job à fila: ${error.message}`);
   }
 }
 

@@ -10,7 +10,6 @@ export async function findWebSite(req, res) {
   try {
     /* Validar usuário */
     const user = req.user;
-    console.log(user);
     if (!user) return res.status(401).json({ message: "Não autorizado" });
 
     const { type } = findWebSiteQuerySchema.parse(req.query);
@@ -55,8 +54,13 @@ export async function findWebSite(req, res) {
       },
     });
 
-    // Retorna a lista de sites clonados em formato JSON
-    return res.status(200).json({ sites, domains });
+    /* URL para acessar cada site (usa title como identificador; domain é só hospedagem) */
+    const sitesWithUrl = sites.map((site) => ({
+      ...site,
+      siteUrl: `${process.env.API_BASE_URL}/api/site/${site.title}`,
+    }));
+
+    return res.status(200).json({ sites: sitesWithUrl, domains });
   } catch (error) {
     /* Captação de erros do Zod */
     if (error instanceof ZodError) {
