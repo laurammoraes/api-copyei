@@ -10,6 +10,7 @@ export async function getWebsiteById(req, res) {
   try {
     /* Validar o corpo da requisição */
     const { id } = getWebsiteByIdParams.parse(req.params);
+    console.log("[getWebsiteById] Buscando site id:", id);
 
     /* Verificar se o site existe, e se não existir, retornar mensagem ao usuário */
     const site = await prisma.websites.findUnique({
