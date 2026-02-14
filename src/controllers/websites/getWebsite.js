@@ -9,7 +9,7 @@ const getWebsiteByIdParams = z.object({
 export async function getWebsiteById(req, res) {
   try {
     /* Validar o corpo da requisição */
-    const { id } = getWebsiteByIdParams.parse(request.params);
+    const { id } = getWebsiteByIdParams.parse(req.params);
 
     /* Verificar se o site existe, e se não existir, retornar mensagem ao usuário */
     const site = await prisma.websites.findUnique({
