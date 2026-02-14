@@ -14,11 +14,12 @@ const cloneBodySchema = z.object({
 
 export async function cloneWebSite(req, res) {
   try {
-    
     const user = req.user;
     if (!user) return res.status(401).json({ message: "Não autorizado" });
 
-    
+    const { url, domainId, title } = cloneBodySchema.parse(req.body);
+    console.log("[cloneWebSite] Início da clonagem:", { userId: user.id, url, title, domainId });
+
     const totalWebsites = await prisma.websites.count({
       where: {
         user_id: user.id,
@@ -31,14 +32,12 @@ export async function cloneWebSite(req, res) {
           "Você chegou no limite de clones dos sites. Para continuar, exclua um de seus sites clonados.",
       });
 
-    
-    const { url, domainId, title } = cloneBodySchema.parse(req.body);
-
-    
     const isValidUrl = await validateUrl(url);
 
-    if (!isValidUrl)
+    if (!isValidUrl) {
+      console.log("[cloneWebSite] URL inválida ou inacessível:", url);
       return res.status(200).json({ message: "URL não encontrada" });
+    }
 
    
     const userData = await prisma.users.findUnique({
@@ -83,14 +82,14 @@ export async function cloneWebSite(req, res) {
         status: "CLONING",
       },
     });
+    console.log("[cloneWebSite] Site criado no banco, id:", data.id);
 
-    
     await sendUrlToQueue(data.id, url, thisDomain.domain, title);
+    console.log("[cloneWebSite] Job enviado para a fila de clonagem, siteId:", data.id);
 
     return res.status(200).json({ message: "OK" });
   } catch (error) {
-
-    console.error(error);
+    console.error("[cloneWebSite] Erro no processo de clonagem:", error.message, error.stack);
     /* Captação de erros do Zod */
     if (error instanceof ZodError) {
       return res.status(400).json({

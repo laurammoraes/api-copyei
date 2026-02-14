@@ -9,12 +9,13 @@ import { prisma } from "../lib/prisma.js";
 dotenv.config();
 
 export async function downloadWebsite(siteId, url, domain, title) {
-  try {
-    const siteDirectory = path.join(
-      process.env.COPYEI_WEBSITES_OUTPUT_DIRECTORY,
-      title
-    );
+  const siteDirectory = path.join(
+    process.env.COPYEI_WEBSITES_OUTPUT_DIRECTORY,
+    title
+  );
+  console.log("[downloadWebsite] Início:", { siteId, url, title, siteDirectory });
 
+  try {
     await scrape({
       urls: [url], // URL do site a ser baixado
       directory: siteDirectory,
@@ -31,6 +32,7 @@ export async function downloadWebsite(siteId, url, domain, title) {
       // filenameGenerator: 'bySiteStructure',
       // prettifyUrls: true,
     });
+    console.log("[downloadWebsite] Scrape concluído para siteId:", siteId);
 
     // TODO: Refactor Domain system
     // if (process.env.NODE_ENV === "production") {
@@ -40,7 +42,7 @@ export async function downloadWebsite(siteId, url, domain, title) {
     //   });
     // }
 
-    // Atualizar o status do site para 'ACTIVE'
+    console.log("[downloadWebsite] Atualizando status para ACTIVE, siteId:", siteId);
     await prisma.websites.update({
       where: {
         id: siteId,
@@ -49,12 +51,22 @@ export async function downloadWebsite(siteId, url, domain, title) {
         status: "ACTIVE",
       },
     });
+    console.log("[downloadWebsite] Clonagem finalizada com sucesso, siteId:", siteId);
 
     if (process.env.NODE_ENV === "development")
       console.info(
         `Download completo! A página foi salva no diretório: ${process.env.COPYEI_WEBSITES_OUTPUT_DIRECTORY}/${title}`
       );
   } catch (error) {
-    console.error(`Erro ao fazer o download: ${error.message}`);
+    console.error(
+      "[downloadWebsite] Erro ao fazer o download:",
+      error.message,
+      "siteId:",
+      siteId,
+      "url:",
+      url,
+      error.stack
+    );
+    throw error;
   }
 }
